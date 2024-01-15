@@ -4,11 +4,12 @@ from day import Day
 
 class Schedule(object):
 
-  def __init__(self,days_cnt,mutation_prob,wishes):
+  def __init__(self,days_cnt,mutation_prob,employees,wishes):
     self.days = [Day() for _ in range(days_cnt)]
     self.fitness = 0 #0-1の値
-    self.fitness_normalized = 0
     self.mutation_prob = mutation_prob
+    self.employees = employees
+    self.employees_utility = []
     self.wishes = wishes
   
   def print(self):
