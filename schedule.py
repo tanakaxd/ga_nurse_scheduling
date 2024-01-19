@@ -2,17 +2,18 @@ import copy
 import random
 import sys
 from day import Day
+from weekday import Weekday
 
 class Schedule(object):
 
   def __init__(self,days_cnt,mutation_prob,employees):
-    self.days = [Day(date+1) for date in range(days_cnt)]
     self.fitness = 0 #0-1の値
     self.mutation_prob = mutation_prob
     self.employees = employees
     self.employees_utility = []
-    self.starting_day_of_week = "日"
-    self.rest_all_day_of_week = "水"
+    self.starting_weekday_of_month = Weekday.MONDAY
+    self.closed_weekday = Weekday.WEDNESDAY
+    self.days = [Day(i+1,self.starting_weekday_of_month,self.closed_weekday) for i in range(days_cnt)]
 
   
   def print(self):
@@ -39,7 +40,7 @@ class Schedule(object):
     # 特定の日を固定で休日にする。連休などの計算に必要になる:(10000)
 
     fitness1,fitness2,fitness3,fitness4,fitness5 = 0,0,0,0,0
-    weight1,weight2,weight3,weight4,weight5 = 100,1,2,10000,0.5
+    weight1,weight2,weight3,weight4,weight5 = 100,1,30,10000,0.5
 
     for i, emp in enumerate(self.employees):
       # 週単位での希望勤務日数:(100)
@@ -47,7 +48,7 @@ class Schedule(object):
       l = [d.cells[i] for d in self.days] 
       l = list(filter(lambda x: x!="R", l)) 
       # 希望とカウント数の差の絶対値を合計する
-      fitness1 += abs(len(l) - emp.on_duty_per_week/7*len(self.days))#TODO とりあえず固定休日は考えず月単位での出勤予定数で評価
+      fitness1 += abs(len(l) - emp.on_duty_per_week/7*len(self.days))#TODO とりあえず週単位ではなく月単位での出勤予定数で評価
       
       # 割り当て区画の幸福度:(1)
       # 単純に全員の幸福度をすべて合算するアプローチ
@@ -64,14 +65,15 @@ class Schedule(object):
         if list_on_duty_date[d]!="R":
           fitness3 -= 1
 
+
+
+    # print(" ")
+    # print(fitness1)
     # 希望とのずれが大きいほどfitnessは小さくしたいのでfitness1は逆数をとる
     if fitness1!=0:
       fitness1 = 1/fitness1
     else:
       fitness1 = 1
-
-
-    # print(" ")
     # print(fitness1)
     # print(fitness2)
     # print(fitness3)

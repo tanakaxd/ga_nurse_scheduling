@@ -5,11 +5,11 @@ from schedule import Schedule
 # 乱数を固定
 # random.seed(64)
 #何世代まで行うか
-NGEN = 50
+NGEN = 30
 #集団の個体数
-POP = 100
+POP = 200
 #個体が突然変異を起こす確率
-MUTPB = 0.03
+MUTPB = 0.1
 #何日間のスケジュールか
 DAYS = 7
 
