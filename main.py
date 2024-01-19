@@ -1,22 +1,29 @@
 import random
+from employee import Employee
 from schedule import Schedule
 
-#乱数を固定
+# 乱数を固定
 # random.seed(64)
 #何世代まで行うか
 NGEN = 50
 #集団の個体数
-POP = 80
+POP = 100
 #個体が突然変異を起こす確率
-MUTPB = 0.1
+MUTPB = 0.03
 #何日間のスケジュールか
-DAYS = 6
+DAYS = 7
 
-# TODO　ラムダで各々の希望をかく？
-WISHES = [5,5,5,2,1]
+a = Employee("OB",True,5,[1],{"A":4,"B":1,"C":1,"E":4,"NE":5})
+b = Employee("T1",True,2.5,[2],{"A":3,"B":3,"C":2,"E":4,"NE":5})
+c = Employee("YM",True,5,[3],{"A":3,"B":3,"C":2,"E":4,"NE":5})
+d = Employee("MO",True,5,[4],{"A":2,"B":3,"C":1,"E":5,"NE":5})
+e = Employee("SM",False,5,[5],{"A":5,"B":1,"C":3,"E":0,"NE":0})
+f = Employee("TT",False,3,[6],{"A":3,"B":3,"C":3,"E":0,"NE":0})
+g = Employee("YZ",False,5,[7],{"A":3,"B":4,"C":3,"E":0,"NE":0})
 
+EMPLOYEES = [a,b,c,d,e,f,g]
 
-pop = [Schedule(DAYS,MUTPB,WISHES) for _ in range(POP)]
+pop = [Schedule(DAYS,MUTPB,EMPLOYEES) for _ in range(POP)]
 gen_cnt = 0
 
 for i in range(NGEN):
