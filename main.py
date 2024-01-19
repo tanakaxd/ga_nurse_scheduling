@@ -3,19 +3,19 @@ from employee import Employee
 from schedule import Schedule
 
 # 乱数を固定
-random.seed(64)
+# random.seed(64)
 #何世代まで行うか
-NGEN = 50
+NGEN = 300
 #集団の個体数
-POP = 300
+POP = 100
 #個体が突然変異を起こす確率
-MUTPB = 0.2
+MUTPB = 0.03
 #何日間のスケジュールか
-DAYS = 7
+DAYS = 21
 
 a = Employee("OB",True,5,[1],{"A":4,"B":1,"C":1,"E":4,"NE":5})
-b = Employee("T1",True,2.5,[2],{"A":3,"B":3,"C":2,"E":4,"NE":5})
-c = Employee("YM",True,5,[3],{"A":3,"B":3,"C":2,"E":4,"NE":5})
+b = Employee("T1",True,2.5,[1,2,3],{"A":3,"B":3,"C":1,"E":4,"NE":5})
+c = Employee("YM",True,5,[3],{"A":3,"B":3,"C":1,"E":4,"NE":5})
 d = Employee("MO",True,5,[4],{"A":2,"B":3,"C":1,"E":5,"NE":5})
 e = Employee("SM",False,5,[5],{"A":5,"B":1,"C":3,"E":0,"NE":0})
 f = Employee("TT",False,3,[6],{"A":3,"B":3,"C":3,"E":0,"NE":0})

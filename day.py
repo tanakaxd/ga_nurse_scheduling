@@ -17,3 +17,14 @@ class Day(object):
     idx1, idx2 = random.sample(range(len(self.cells)), 2)
     # 選択した2つの要素を入れ替え
     self.cells[idx1], self.cells[idx2] = self.cells[idx2], self.cells[idx1]
+  def fixed_R_shuffle(self,fixed_indeces):
+    # cellsから固定するR要素を休み希望人数分除去する
+    for _ in range(len(fixed_indeces)):
+      self.cells.remove("R")
+
+    # リストをシャッフル
+    random.shuffle(self.cells)
+
+    # シャッフルしたリストに固定する要素を挿入
+    for i in sorted(fixed_indeces):
+        self.cells.insert(i, "R")
