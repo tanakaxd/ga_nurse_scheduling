@@ -14,6 +14,7 @@ class Schedule(object):
     self.starting_weekday_of_month = Weekday.MONDAY
     self.closed_weekday = Weekday.WEDNESDAY
     self.days = [Day(i+1,self.starting_weekday_of_month,self.closed_weekday) for i in range(days_cnt)]
+    # TODO 初期化時に休みをぶち込む
 
   
   def print(self):
@@ -32,15 +33,15 @@ class Schedule(object):
 
   def calcFitness(self):
     # TODO
-    # 週単位での希望勤務日数:(2)
-    # 割り当て区画の幸福度:(1)
-    # 出勤できない日:(10000)
-    # E/NEは女性陣しかできない:(10000)
-    # テーブル割当はできるだけばらけるようにする:(0.5)
-    # 特定の日を固定で休日にする。連休などの計算に必要になる:(10000)
+    # 週単位での希望勤務日数:
+    # 割り当て区画の幸福度:
+    # 出勤できない日:
+    # E/NEは女性陣しかできない:
+    # テーブル割当はできるだけばらけるようにする:
+    # 特定の日を固定で休日にする。連休などの計算に必要になる:
 
     fitness1,fitness2,fitness3,fitness4,fitness5 = 0,0,0,0,0
-    weight1,weight2,weight3,weight4,weight5 = 100,1,30,10000,0.5
+    weight1,weight2,weight3,weight4,weight5 = 100,5,30,10,0.5
 
     for i, emp in enumerate(self.employees):
       # 週単位での希望勤務日数:(100)
@@ -65,6 +66,11 @@ class Schedule(object):
         if list_on_duty_date[d]!="R":
           fitness3 -= 1
 
+      # E/NEは女性陣しかできない:(10000)
+      if not(emp.able_to):
+        for d in self.days:
+          if d.cells[i]=="E" or d.cells[i]=="NE":
+            fitness4 -= 1
 
 
     # print(" ")
@@ -81,7 +87,7 @@ class Schedule(object):
     # print(fitness2 * weight2)
     # print(fitness3 * weight3)
 
-    total_fitness = fitness1 * weight1 + fitness2 * weight2 + fitness3 * weight3
+    total_fitness = fitness1 * weight1 + fitness2 * weight2 + fitness3 * weight3 + fitness4 * weight4
     # print(f'total_fitness = {total_fitness}')
     self.fitness = max(sys.float_info.epsilon,total_fitness)
     # print(f'self.fitness = {self.fitness}')

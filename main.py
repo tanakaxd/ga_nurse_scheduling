@@ -3,13 +3,13 @@ from employee import Employee
 from schedule import Schedule
 
 # 乱数を固定
-# random.seed(64)
+random.seed(64)
 #何世代まで行うか
-NGEN = 30
+NGEN = 50
 #集団の個体数
-POP = 200
+POP = 300
 #個体が突然変異を起こす確率
-MUTPB = 0.1
+MUTPB = 0.2
 #何日間のスケジュールか
 DAYS = 7
 
