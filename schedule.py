@@ -37,8 +37,11 @@ class Schedule(object):
     for d in self.days:
       print(f'{d.date}:{d.cells}')
     # 労働者ごとの幸福度、勤務日数
-    print([round(u,2) for u in self.employees_utility])
     print(self.employees_on_duty_cnt)
+    # リストAの各要素を同じインデックスのリストBの各要素で割る
+    # result = [a / b for a, b in zip(A, B)]
+    utility_normalized = [a / b for a, b in zip(self.employees_utility, self.employees_on_duty_cnt)]
+    print([round(u,2) for u in utility_normalized])
     
   
   def cross(self, another):
@@ -103,6 +106,8 @@ class Schedule(object):
       fitness1 = 1/fitness1
     else:
       fitness1 = 1
+    # シミュレートする日数の長さに応じて補正をかける
+    fitness1 = fitness1 * len(self.days)/7
     # print(fitness1)
     # print(fitness2)
     # print(fitness3)
@@ -116,18 +121,3 @@ class Schedule(object):
     self.fitness = max(sys.float_info.epsilon,total_fitness)
     # print(f'self.fitness = {self.fitness}')
     
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-      

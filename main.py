@@ -5,26 +5,27 @@ from schedule import Schedule
 # 乱数を固定
 # random.seed(64)
 #何世代まで行うか
-NGEN = 300
+NGEN = 500
 #集団の個体数
-POP = 100
+POP = 300
 #個体が突然変異を起こす確率
 MUTPB = 0.03
 #何日間のスケジュールか
-DAYS = 21
+DAYS = 30
 
 a = Employee("OB",True,5,[1],{"A":4,"B":1,"C":1,"E":4,"NE":5})
-b = Employee("T1",True,2.5,[1,2,3],{"A":3,"B":3,"C":1,"E":4,"NE":5})
+b = Employee("T1",True,2.5,[1,2,3,4,5],{"A":3,"B":3,"C":1,"E":4,"NE":5})
 c = Employee("YM",True,5,[3],{"A":3,"B":3,"C":1,"E":4,"NE":5})
 d = Employee("MO",True,5,[4],{"A":2,"B":3,"C":1,"E":5,"NE":5})
 e = Employee("SM",False,5,[5],{"A":5,"B":1,"C":3,"E":0,"NE":0})
 f = Employee("TT",False,3,[6],{"A":3,"B":3,"C":3,"E":0,"NE":0})
-g = Employee("YZ",False,5,[7],{"A":3,"B":4,"C":3,"E":0,"NE":0})
+g = Employee("YZ",False,5,[7,8,9,10,11],{"A":3,"B":4,"C":3,"E":0,"NE":0})
 
 EMPLOYEES = [a,b,c,d,e,f,g]
 
 pop = [Schedule(DAYS,MUTPB,EMPLOYEES) for _ in range(POP)]
 gen_cnt = 0
+hall_of_fame = None
 
 for i in range(NGEN):
 
@@ -37,6 +38,12 @@ for i in range(NGEN):
   max_fit = max(fitness_list)
   print(f'AVERAGE:{sum(fitness_list)/POP}')
   fittest_schedule = pop[fitness_list.index(max_fit)]
+  # 殿堂入りの更新
+  if hall_of_fame==None:
+    hall_of_fame = fittest_schedule
+  elif hall_of_fame.fitness<fittest_schedule.fitness:
+    hall_of_fame = fittest_schedule
+
   fittest_schedule.print()
 
   # intercourse
@@ -49,5 +56,8 @@ for i in range(NGEN):
     new_pop.append(child)
   pop = new_pop
   gen_cnt+=1
+
+print("HALL OF FAME")
+hall_of_fame.print()
 
 
