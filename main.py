@@ -9,17 +9,18 @@ NGEN = 500
 #集団の個体数
 POP = 300
 #個体が突然変異を起こす確率
+# 世代が進むほど局所解の可能性が上がるので徐々に変異率を上げる手法はありか？
 MUTPB = 0.03
 #何日間のスケジュールか
-DAYS = 30
+DAYS = 29
 
-a = Employee("OB",True,5,[1],{"A":4,"B":1,"C":1,"E":4,"NE":5})
-b = Employee("T1",True,2.5,[1,2,3,4,5],{"A":3,"B":3,"C":1,"E":4,"NE":5})
-c = Employee("YM",True,5,[3],{"A":3,"B":3,"C":1,"E":4,"NE":5})
-d = Employee("MO",True,5,[4],{"A":2,"B":3,"C":1,"E":5,"NE":5})
-e = Employee("SM",False,5,[5],{"A":5,"B":1,"C":3,"E":0,"NE":0})
-f = Employee("TT",False,3,[6],{"A":3,"B":3,"C":3,"E":0,"NE":0})
-g = Employee("YZ",False,5,[7,8,9,10,11],{"A":3,"B":4,"C":3,"E":0,"NE":0})
+a = Employee("OB",True,5,[],{"A":4,"B":1,"C":1,"E":4,"NE":5})
+b = Employee("T1",True,2.5,[4,9,10,13,15,16,19,23,24,26,27,29],{"A":1,"B":4,"C":1,"E":4,"NE":4})
+c = Employee("YM",True,5,[],{"A":1,"B":3,"C":1,"E":5,"NE":5})
+d = Employee("MO",True,5,[],{"A":2,"B":3,"C":1,"E":5,"NE":5})
+e = Employee("SM",False,5,[3],{"A":5,"B":1,"C":3,"E":0,"NE":0})
+f = Employee("TT",False,3,[],{"A":2,"B":3,"C":4,"E":0,"NE":0})
+g = Employee("YZ",False,5,[8,9,10],{"A":4,"B":4,"C":3,"E":0,"NE":0})
 
 EMPLOYEES = [a,b,c,d,e,f,g]
 

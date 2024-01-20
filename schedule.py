@@ -12,10 +12,9 @@ class Schedule(object):
     self.employees = employees
     self.employees_utility = []
     self.employees_on_duty_cnt = []
-    self.starting_weekday_of_month = Weekday.MONDAY
+    self.starting_weekday_of_month = Weekday.THURSDAY
     self.closed_weekday = Weekday.WEDNESDAY
     self.days = [Day(i+1,self.starting_weekday_of_month,self.closed_weekday) for i in range(days_cnt)]
-    # TODO 初期化時に休みをぶち込む。休み希望者が複数の場合も考える必要あり。厳密に満たす必要は実はないかもしれない
     # 日にち:休み希望者というディクショナリをつくる。日にちをkeyにするのは、同日はemp単位ではなくまとめて書き換えたいから
     day_off_dict = {}
     for emp_index,emp in enumerate(employees):
@@ -29,8 +28,6 @@ class Schedule(object):
     # その責任はdayクラスに持たせる
     for key,value in day_off_dict.items():
       self.days[key-1].fixed_R_shuffle(value)
-
-
   
   def print(self):
     print(f'Schedule(fitness={self.fitness})')
@@ -42,10 +39,8 @@ class Schedule(object):
     # result = [a / b for a, b in zip(A, B)]
     utility_normalized = [a / b for a, b in zip(self.employees_utility, self.employees_on_duty_cnt)]
     print([round(u,2) for u in utility_normalized])
-    
   
   def cross(self, another):
-    # child = copy.deepcopy(self)
     child = Schedule(len(self.days),self.mutation_prob,self.employees)
     for i, _ in enumerate(child.days):
         # 親の日のdeepcopyを子供の日に設定
