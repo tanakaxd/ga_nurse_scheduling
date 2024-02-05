@@ -62,7 +62,7 @@ class Schedule(object):
     #TODO テーブル割当はできるだけばらけるようにする:
 
     fitness1,fitness2,fitness3,fitness4,fitness5,fitness6 = 0,0,0,0,0,0
-    weight1,weight2,weight3,weight4,weight5,weight6 = 100,3,30,10,1,1
+    weight1,weight2,weight3,weight4,weight5,weight6 = 100,3,30,10,1,10
 
     for i, emp in enumerate(self.employees):
       # 週単位での希望勤務日数:(100)
@@ -105,8 +105,8 @@ class Schedule(object):
         if p!="R":
           seq+=1
         else:
+          fitness6 = fitness6 - (max(0,seq - emp.on_duty_per_week))**2
           seq=0
-      fitness6 = fitness6 - (seq - emp.on_duty_per_week)**2
 
 
 
