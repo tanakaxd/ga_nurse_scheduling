@@ -1,5 +1,6 @@
 import random
 from employee import Employee
+from shimura import Shimura
 from schedule import Schedule
 
 # 乱数を固定
@@ -14,13 +15,13 @@ MUTPB = 0.03
 #何日間のスケジュールか
 DAYS = 29
 
-a = Employee("OB",True,5,[],{"A":4,"B":1,"C":1,"E":4,"NE":5})
-b = Employee("T1",True,2.5,[4,9,10,13,15,16,19,23,24,26,27,29],{"A":1,"B":4,"C":1,"E":4,"NE":4})
-c = Employee("YM",True,5,[],{"A":1,"B":3,"C":1,"E":5,"NE":5})
-d = Employee("MO",True,5,[],{"A":2,"B":3,"C":1,"E":5,"NE":5})
-e = Employee("SM",False,5,[3],{"A":5,"B":1,"C":3,"E":0,"NE":0})
-f = Employee("TT",False,3,[],{"A":2,"B":3,"C":4,"E":0,"NE":0})
-g = Employee("YZ",False,5,[8,9,10],{"A":4,"B":4,"C":3,"E":0,"NE":0})
+a = Employee("OB",True,5,[],{"A":4,"B":1,"C":0,"E":4,"NE":5})
+b = Employee("T1",True,2.5,[4,9,10,13,15,16,19,23,24,26,27,29],{"A":1,"B":4,"C":0,"E":4,"NE":4})
+c = Employee("YM",True,5,[],{"A":1,"B":3,"C":0,"E":5,"NE":5})
+d = Employee("MO",True,5,[],{"A":2,"B":3,"C":0,"E":5,"NE":5})
+e = Shimura("SM",False,5,[3],{"A":5,"B":1,"C":3,"E":0,"NE":0})
+f = Employee("TT",False,3,[],{"A":4,"B":3,"C":5,"E":0,"NE":0})
+g = Employee("YZ",False,5,[8,9,10],{"A":3,"B":3,"C":4,"E":0,"NE":0})
 
 EMPLOYEES = [a,b,c,d,e,f,g]
 

@@ -8,3 +8,6 @@ class Employee(object):
         total = sum(self.plot_preference.values())
         self.plot_preference_normalized = {k: v/total*(5 if able_to else 3) for k,v in self.plot_preference.items()}
         #休みに幸福度を設定する可能性。別の言い方をすれば、予定より多く勤務することをどの程度嫌うか
+
+    def wish(self,schedule,index):
+        return 0

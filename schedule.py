@@ -13,6 +13,7 @@ class Schedule(object):
     self.employees_utility = []
     self.employees_on_duty_cnt = []
     self.starting_weekday_of_month = Weekday.THURSDAY
+    # 特定の日を固定で休日にする。連休などの計算に必要になる:
     self.closed_weekday = Weekday.WEDNESDAY
     self.days = [Day(i+1,self.starting_weekday_of_month,self.closed_weekday) for i in range(days_cnt)]
     # 日にち:休み希望者というディクショナリをつくる。日にちをkeyにするのは、同日はemp単位ではなくまとめて書き換えたいから
@@ -55,24 +56,26 @@ class Schedule(object):
     # 割り当て区画の幸福度:
     # 出勤できない日:
     # E/NEは女性陣しかできない:
-    # テーブル割当はできるだけばらけるようにする:
-    # 特定の日を固定で休日にする。連休などの計算に必要になる:
+    # 個人の希望を取り入れる
+    # 連勤をできるだけ防ぐ。希望勤務日数に比例するようにする。希望出勤数が多ければ連勤もやむなし
 
-    fitness1,fitness2,fitness3,fitness4,fitness5 = 0,0,0,0,0
-    weight1,weight2,weight3,weight4,weight5 = 100,3,30,10,0.5
+    #TODO テーブル割当はできるだけばらけるようにする:
+
+    fitness1,fitness2,fitness3,fitness4,fitness5,fitness6 = 0,0,0,0,0,0
+    weight1,weight2,weight3,weight4,weight5,weight6 = 100,3,30,10,1,1
 
     for i, emp in enumerate(self.employees):
       # 週単位での希望勤務日数:(100)
-      # 人ごとにRでない記号をカウントする
+      # empごとにRでない記号をカウントする
       l = [d.cells[i] for d in self.days] 
-      l = list(filter(lambda x: x!="R", l)) 
-      self.employees_on_duty_cnt.append(len(l))
+      ll = list(filter(lambda x: x!="R", l)) 
+      self.employees_on_duty_cnt.append(len(ll))
       # 希望とカウント数の差の絶対値を合計する
-      fitness1 += abs(len(l) - emp.on_duty_per_week/7*len(self.days))#TODO とりあえず週単位ではなく月単位での出勤予定数で評価
+      fitness1 += abs(len(ll) - emp.on_duty_per_week/7*len(self.days))#TODO とりあえず週単位ではなく月単位での出勤予定数で評価
       
       # 割り当て区画の幸福度:(1)
       # 単純に全員の幸福度をすべて合算するアプローチ
-      utility = sum([emp.plot_preference_normalized[plot] for plot in l])
+      utility = sum([emp.plot_preference_normalized[plot] for plot in ll])
       self.employees_utility.append(utility)
       fitness2 += utility
 
@@ -93,6 +96,19 @@ class Schedule(object):
           if d.cells[i]=="E" or d.cells[i]=="NE":
             fitness4 -= 1
 
+      # TODO それぞれ独自のwishを満たしているか評価
+      fitness5 += emp.wish(self,i)
+
+      # 連勤をできるだけ防ぐ。
+      seq = 0
+      for p in l:
+        if p!="R":
+          seq+=1
+        else:
+          seq=0
+      fitness6 = fitness6 - (seq - emp.on_duty_per_week)**2
+
+
 
     # print(" ")
     # print(fitness1)
@@ -110,7 +126,7 @@ class Schedule(object):
     # print(fitness2 * weight2)
     # print(fitness3 * weight3)
 
-    total_fitness = fitness1 * weight1 + fitness2 * weight2 + fitness3 * weight3 + fitness4 * weight4
+    total_fitness = fitness1 * weight1 + fitness2 * weight2 + fitness3 * weight3 + fitness4 * weight4 + fitness5 * weight5 + fitness6 * weight6
     # total_fitness = total_fitness * total_fitness
     # print(f'total_fitness = {total_fitness}')
     self.fitness = max(sys.float_info.epsilon,total_fitness)
