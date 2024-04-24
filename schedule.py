@@ -12,7 +12,7 @@ class Schedule(object):
     self.employees = employees
     self.employees_utility = []
     self.employees_on_duty_cnt = []
-    self.starting_weekday_of_month = Weekday.THURSDAY
+    self.starting_weekday_of_month = Weekday.WEDNESDAY
     # 特定の日を固定で休日にする。連休などの計算に必要になる:
     self.closed_weekday = Weekday.WEDNESDAY
     self.days = [Day(i+1,self.starting_weekday_of_month,self.closed_weekday) for i in range(days_cnt)]
@@ -132,3 +132,8 @@ class Schedule(object):
     self.fitness = max(sys.float_info.epsilon,total_fitness)
     # print(f'self.fitness = {self.fitness}')
     
+
+  def clear(self):
+    self.fitness = 0
+    self.employees_utility = []
+    self.employees_on_duty_cnt = []

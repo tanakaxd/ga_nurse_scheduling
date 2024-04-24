@@ -1,33 +1,47 @@
+import copy
 import random
 from employee import Employee
 from shimura import Shimura
 from schedule import Schedule
 
+import matplotlib.pyplot as plt
+
+#TODO
+# average fitnessの推移をグラフ化
+# エリート保存
+# 交配確率の最適化
+# スケジュール部分固定の実装
+# 保存したスケジュールからインスタンス化
+# 労働者相性の実装
+
 # 乱数を固定
 # random.seed(64)
 #何世代まで行うか
-NGEN = 500
+NGEN = 1000
 #集団の個体数
 POP = 300
 #個体が突然変異を起こす確率
 # 世代が進むほど局所解の可能性が上がるので徐々に変異率を上げる手法はありか？
 MUTPB = 0.03
 #何日間のスケジュールか
-DAYS = 29
+DAYS = 31
 
-a = Employee("OB",True,5,[],{"A":4,"B":1,"C":0,"E":4,"NE":5})
-b = Employee("T1",True,2.5,[4,9,10,13,15,16,19,23,24,26,27,29],{"A":1,"B":4,"C":0,"E":4,"NE":4})
-c = Employee("YM",True,5,[],{"A":1,"B":3,"C":0,"E":5,"NE":5})
-d = Employee("MO",True,5,[],{"A":2,"B":3,"C":0,"E":5,"NE":5})
-e = Shimura("SM",False,5,[3],{"A":5,"B":1,"C":3,"E":0,"NE":0})
-f = Employee("TT",False,3,[],{"A":4,"B":3,"C":5,"E":0,"NE":0})
-g = Employee("YZ",False,5,[8,9,10],{"A":3,"B":2,"C":5,"E":0,"NE":0})
+a = Employee("OB",True,5,[],{"A":3,"B":1,"C":0,"E":5,"NE":3})
+b = Employee("T1",True,3,[],{"A":3,"B":5,"C":0,"E":1,"NE":3})
+c = Employee("MO",True,5,[],{"A":1,"B":3,"C":0,"E":3,"NE":5})
+d = Shimura("SM",False,5,[],{"A":3,"B":1,"C":5,"E":0,"NE":0})
+e = Employee("TT",False,3,[],{"A":4,"B":2,"C":3,"E":0,"NE":0})
+f = Employee("ON",False,5,[],{"A":0,"B":2,"C":4,"E":0,"NE":0})
+g = Employee("HK",True,4,[19],{"A":4,"B":0,"C":0,"E":0,"NE":2})
 
 EMPLOYEES = [a,b,c,d,e,f,g]
 
 pop = [Schedule(DAYS,MUTPB,EMPLOYEES) for _ in range(POP)]
 gen_cnt = 0
+average_fitness_history = []
+gen_max_fit_history = []
 hall_of_fame = None
+hof_gen = 0
 
 for i in range(NGEN):
 
@@ -38,20 +52,27 @@ for i in range(NGEN):
     s.calcFitness()
   fitness_list = [s.fitness for s in pop]
   max_fit = max(fitness_list)
-  print(f'AVERAGE:{sum(fitness_list)/POP}')
+  gen_max_fit_history.append(max_fit)
+  ave = sum(fitness_list)/POP
+  average_fitness_history.append(ave)
+  print(f'AVERAGE:{ave}')
   fittest_schedule = pop[fitness_list.index(max_fit)]
   # 殿堂入りの更新
   if hall_of_fame==None:
     hall_of_fame = fittest_schedule
+    hof_gen = gen_cnt
   elif hall_of_fame.fitness<fittest_schedule.fitness:
     hall_of_fame = fittest_schedule
+    hof_gen = gen_cnt
 
   fittest_schedule.print()
 
   # intercourse
-  probabilities = [s.fitness for s in pop]
+  probabilities = [s.fitness**2 for s in pop]
   probabilities = [p/sum(probabilities) for p in probabilities]
   new_pop = []
+  hall_of_fame.clear()
+  new_pop.append(hall_of_fame)# エリートを直接引き継ぐ
   for j in range(POP):
     pairs = random.choices(pop, weights=probabilities, k=2)
     child = pairs[0].cross(pairs[1])
@@ -60,6 +81,9 @@ for i in range(NGEN):
   gen_cnt+=1
 
 print("HALL OF FAME")
+print(f'GENERATION:{hof_gen}')
 hall_of_fame.print()
 
-
+plt.plot(average_fitness_history)
+plt.plot(gen_max_fit_history)
+plt.show()
