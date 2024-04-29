@@ -1,4 +1,3 @@
-import copy
 import random
 from employee import Employee
 from shimura import Shimura
@@ -17,7 +16,7 @@ import matplotlib.pyplot as plt
 # 乱数を固定
 # random.seed(64)
 #何世代まで行うか
-NGEN = 1000
+NGEN = 10
 #集団の個体数
 POP = 300
 #個体が突然変異を起こす確率
@@ -25,14 +24,16 @@ POP = 300
 MUTPB = 0.03
 #何日間のスケジュールか
 DAYS = 31
+#保存されるエリートの世代ごとの個体数
+ELITISM = 1
 
 a = Employee("OB",True,5,[],{"A":3,"B":1,"C":0,"E":5,"NE":3})
 b = Employee("T1",True,3,[],{"A":3,"B":5,"C":0,"E":1,"NE":3})
 c = Employee("MO",True,5,[],{"A":1,"B":3,"C":0,"E":3,"NE":5})
 d = Shimura("SM",False,5,[],{"A":3,"B":1,"C":5,"E":0,"NE":0})
-e = Employee("TT",False,3,[],{"A":4,"B":2,"C":3,"E":0,"NE":0})
+e = Employee("TT",False,4,[],{"A":4,"B":2,"C":3,"E":0,"NE":0})
 f = Employee("ON",False,5,[],{"A":0,"B":2,"C":4,"E":0,"NE":0})
-g = Employee("HK",True,4,[19],{"A":4,"B":0,"C":0,"E":0,"NE":2})
+g = Employee("HK",True,3.5,[19],{"A":4,"B":0,"C":0,"E":0,"NE":2})
 
 EMPLOYEES = [a,b,c,d,e,f,g]
 
@@ -57,6 +58,7 @@ for i in range(NGEN):
   average_fitness_history.append(ave)
   print(f'AVERAGE:{ave}')
   fittest_schedule = pop[fitness_list.index(max_fit)]
+
   # 殿堂入りの更新
   if hall_of_fame==None:
     hall_of_fame = fittest_schedule
@@ -73,7 +75,7 @@ for i in range(NGEN):
   new_pop = []
   hall_of_fame.clear()
   new_pop.append(hall_of_fame)# エリートを直接引き継ぐ
-  for j in range(POP):
+  for j in range(POP-ELITISM):# エリートを除外
     pairs = random.choices(pop, weights=probabilities, k=2)
     child = pairs[0].cross(pairs[1])
     new_pop.append(child)
@@ -82,6 +84,7 @@ for i in range(NGEN):
 
 print("HALL OF FAME")
 print(f'GENERATION:{hof_gen}')
+hall_of_fame.calcFitness()
 hall_of_fame.print()
 
 plt.plot(average_fitness_history)
