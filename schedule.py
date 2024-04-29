@@ -91,10 +91,10 @@ class Schedule(object):
           fitness3 -= 1
 
       # E/NEは女性陣しかできない:(10000)
-      if not(emp.able_to):
-        for d in self.days:
-          if d.cells[i]=="E" or d.cells[i]=="NE":
-            fitness4 -= 1
+      # if not(emp.able_to):
+      #   for d in self.days:
+      #     if d.cells[i]=="E" or d.cells[i]=="NE":
+      #       fitness4 -= 1
 
       # TODO それぞれ独自のwishを満たしているか評価
       fitness5 += emp.wish(self,i)

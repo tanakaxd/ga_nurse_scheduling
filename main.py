@@ -8,15 +8,18 @@ import matplotlib.pyplot as plt
 #TODO
 # average fitnessの推移をグラフ化
 # エリート保存
-# 交配確率の最適化
-# スケジュール部分固定の実装
+
+# utilityの最適化、担当可能区画の数に応じて標準化する仕様。とりあえず女性かどうかを考慮しないことにする
+
 # 保存したスケジュールからインスタンス化
+# スケジュール部分固定の実装
 # 労働者相性の実装
+# 交配確率の最適化
 
 # 乱数を固定
 # random.seed(64)
 #何世代まで行うか
-NGEN = 10
+NGEN = 1000
 #集団の個体数
 POP = 300
 #個体が突然変異を起こす確率
@@ -27,13 +30,13 @@ DAYS = 31
 #保存されるエリートの世代ごとの個体数
 ELITISM = 1
 
-a = Employee("OB",True,5,[],{"A":3,"B":1,"C":0,"E":5,"NE":3})
-b = Employee("T1",True,3,[],{"A":3,"B":5,"C":0,"E":1,"NE":3})
-c = Employee("MO",True,5,[],{"A":1,"B":3,"C":0,"E":3,"NE":5})
-d = Shimura("SM",False,5,[],{"A":3,"B":1,"C":5,"E":0,"NE":0})
-e = Employee("TT",False,4,[],{"A":4,"B":2,"C":3,"E":0,"NE":0})
-f = Employee("ON",False,5,[],{"A":0,"B":2,"C":4,"E":0,"NE":0})
-g = Employee("HK",True,3.5,[19],{"A":4,"B":0,"C":0,"E":0,"NE":2})
+a = Employee("OB",4,5,[],{"A":3,"B":1,"C":0,"E":5,"NE":3})
+b = Employee("T1",4,3,[],{"A":3,"B":5,"C":0,"E":1,"NE":3})
+c = Employee("MO",4,5,[],{"A":1,"B":3,"C":0,"E":3,"NE":5})
+d = Shimura("SM",3,5,[],{"A":3,"B":1,"C":5,"E":0,"NE":0})
+e = Employee("TT",3,4,[],{"A":4,"B":2,"C":3,"E":0,"NE":0})
+f = Employee("ON",2,5,[],{"A":0,"B":2,"C":4,"E":0,"NE":0})
+g = Employee("HK",2,3.5,[19],{"A":4,"B":0,"C":0,"E":0,"NE":2})
 
 EMPLOYEES = [a,b,c,d,e,f,g]
 
