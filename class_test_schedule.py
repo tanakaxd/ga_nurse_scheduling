@@ -31,6 +31,7 @@ DAYS = 31
 ELITISM = 1
 #保存するcsvファイルの名前
 CSV_NAME = "schedule.csv"
+# CSV_NAME = "modified_schedule.csv"
 
 a = Employee("OB",4,5,[],{"A":3,"B":1,"C":0,"E":5,"NE":3})
 b = Employee("T1",4,3,[],{"A":3,"B":5,"C":0,"E":1,"NE":3})

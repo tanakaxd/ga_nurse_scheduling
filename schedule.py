@@ -4,6 +4,7 @@ import random
 import sys
 from day import Day
 from weekday import Weekday
+import numpy as np
 
 class Schedule(object):
 
@@ -67,7 +68,7 @@ class Schedule(object):
     #TODO テーブル割当はできるだけばらけるようにする:
 
     fitness1,fitness2,fitness3,fitness4,fitness5,fitness6 = 0,0,0,0,0,0
-    weight1,weight2,weight3,weight4,weight5,weight6 = 100,3,30,10,1,10
+    weight1,weight2,weight3,weight4,weight5,weight6 = 100,1,30,10,1,10
 
     for i, emp in enumerate(self.employees):
       # 週単位での希望勤務日数:(100)
@@ -78,14 +79,23 @@ class Schedule(object):
       # 希望とカウント数の差の絶対値を合計する
       fitness1 += abs(len(ll) - emp.on_duty_per_week/7*len(self.days))#TODO とりあえず週単位ではなく月単位での出勤予定数で評価
       
-      # 割り当て区画の幸福度:(1)
+      # 割り当て区画の幸福度:(30)
       # 単純に全員の幸福度をすべて合算するアプローチ
-      utility = sum([emp.plot_preference_normalized[plot] for plot in ll])
+      # 担当できない区画をどう表すかが課題
+      # 例えば単純な和だと[0,0,5]と[1,2,2]が同価値になってしまう
+      # この場合0が担当できない区画だとすると不適切になる
+      # 積にしたらどうなる？
+      # =>指数関数的にfitnessが増大しすぎてしまい、ほかのutilityの価値が低くなってしまう。
+      # 解決策としては、plot_preference_normalizedをfraction的にする。1を基準にする？
+      # 積ではなく和のままで、担当できない区画にマイナスをつける（シンプルな和ができず美しい解決法ではない）
+      # また、weightを重くするのは別fitnessより優先度を重くすることはできるが、同カテゴリー内での序列付けとしては機能しないことを留意せよ
+      # [0,0,5][1,2,2]を[0,0,10][2,4,4]としても全体の功利には変化がない
+      utility = np.prod([emp.plot_preference_normalized[plot] for plot in ll])
       self.employees_utility.append(utility)
       fitness2 += utility
 
 
-      # 出勤できない日:(10000)
+      # 出勤できない日:(30)
       # 一つでも当てはまったら即却下でもいいかもしれないがループを二重に抜ける必要がある
       # 即最低値にすると全個体が実践的には最低評価になってしまうので、禁止事項を満たすほどマイナスを増やしていく
       # emp一人の、つまり縦の{日付、区画}ディクショナリを作る
@@ -101,10 +111,10 @@ class Schedule(object):
       #     if d.cells[i]=="E" or d.cells[i]=="NE":
       #       fitness4 -= 1
 
-      # TODO それぞれ独自のwishを満たしているか評価
+      # TODO それぞれ独自のwishを満たしているか評価:(1)
       fitness5 += emp.wish(self,i)
 
-      # 連勤をできるだけ防ぐ。
+      # 連勤をできるだけ防ぐ:(10)
       seq = 0
       for p in l:
         if p!="R":

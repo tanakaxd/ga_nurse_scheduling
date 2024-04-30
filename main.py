@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 # 乱数を固定
 # random.seed(64)
 #何世代まで行うか
-NGEN = 1000
+NGEN = 100
 #集団の個体数
 POP = 300
 #個体が突然変異を起こす確率
