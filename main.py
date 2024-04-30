@@ -29,6 +29,8 @@ MUTPB = 0.03
 DAYS = 31
 #保存されるエリートの世代ごとの個体数
 ELITISM = 1
+#保存するcsvファイルの名前
+CSV_NAME = "schedule.csv"
 
 a = Employee("OB",4,5,[],{"A":3,"B":1,"C":0,"E":5,"NE":3})
 b = Employee("T1",4,3,[],{"A":3,"B":5,"C":0,"E":1,"NE":3})
@@ -40,7 +42,14 @@ g = Employee("HK",2,3.5,[19],{"A":4,"B":0,"C":0,"E":0,"NE":2})
 
 EMPLOYEES = [a,b,c,d,e,f,g]
 
-pop = [Schedule(DAYS,MUTPB,EMPLOYEES) for _ in range(POP)]
+loaded_sche = Schedule.load_from_csv(DAYS,MUTPB,EMPLOYEES,CSV_NAME)
+loaded_sche.print()
+
+pop = []
+pop.append(loaded_sche)
+while len(pop)<POP:
+  pop.append(Schedule(DAYS,MUTPB,EMPLOYEES))
+# pop = [Schedule(DAYS,MUTPB,EMPLOYEES) for _ in range(POP)]
 gen_cnt = 0
 average_fitness_history = []
 gen_max_fit_history = []
@@ -89,6 +98,7 @@ print("HALL OF FAME")
 print(f'GENERATION:{hof_gen}')
 hall_of_fame.calcFitness()
 hall_of_fame.print()
+hall_of_fame.save_to_csv(CSV_NAME)
 
 plt.plot(average_fitness_history)
 plt.plot(gen_max_fit_history)

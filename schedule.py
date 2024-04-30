@@ -1,4 +1,5 @@
 import copy
+import csv
 import random
 import sys
 from day import Day
@@ -6,8 +7,9 @@ from weekday import Weekday
 
 class Schedule(object):
 
-  def __init__(self,days_cnt,mutation_prob,employees):
+  def __init__(self,days_cnt,mutation_prob,employees,days_data=None):
     self.fitness = 0 #0-1の値
+    self.days_cnt = days_cnt
     self.mutation_prob = mutation_prob
     self.employees = employees
     self.employees_utility = []
@@ -15,20 +17,23 @@ class Schedule(object):
     self.starting_weekday_of_month = Weekday.WEDNESDAY
     # 特定の日を固定で休日にする。連休などの計算に必要になる:
     self.closed_weekday = Weekday.WEDNESDAY
-    self.days = [Day(i+1,self.starting_weekday_of_month,self.closed_weekday) for i in range(days_cnt)]
-    # 日にち:休み希望者というディクショナリをつくる。日にちをkeyにするのは、同日はemp単位ではなくまとめて書き換えたいから
-    day_off_dict = {}
-    for emp_index,emp in enumerate(employees):
-      for date in emp.date_off_duty:
-        if date not in day_off_dict:
-            day_off_dict[date] = [emp_index]
-        else:
-            day_off_dict[date].append(emp_index)
-    # ディクショナリをループし、dayのcellsを書き換える
-    # ただし、cellsの割り当てバランスを崩してはいけないので、固定してシャッフルする必要がある
-    # その責任はdayクラスに持たせる
-    for key,value in day_off_dict.items():
-      self.days[key-1].fixed_R_shuffle(value)
+    if days_data is not None:
+      self.days = [Day(i+1,self.starting_weekday_of_month,self.closed_weekday,len(self.employees),day_data) for i,day_data in enumerate(days_data)]
+    else:
+      self.days = [Day(i+1,self.starting_weekday_of_month,self.closed_weekday,len(self.employees)) for i in range(self.days_cnt)]
+      # 日にち:休み希望者というディクショナリをつくる。日にちをkeyにするのは、同日はemp単位ではなくまとめて書き換えたいから
+      day_off_dict = {}
+      for emp_index,emp in enumerate(employees):
+        for date in emp.date_off_duty:
+          if date not in day_off_dict:
+              day_off_dict[date] = [emp_index]
+          else:
+              day_off_dict[date].append(emp_index)
+      # ディクショナリをループし、dayのcellsを書き換える
+      # ただし、cellsの割り当てバランスを崩してはいけないので、固定してシャッフルする必要がある
+      # その責任はdayクラスに持たせる
+      for key,value in day_off_dict.items():
+        self.days[key-1].fixed_R_shuffle(value)
   
   def print(self):
     print(f'Schedule(fitness={self.fitness})')
@@ -137,3 +142,20 @@ class Schedule(object):
     self.fitness = 0
     self.employees_utility = []
     self.employees_on_duty_cnt = []
+
+
+
+  def save_to_csv(self, filename):
+    with open(filename, 'w', newline='') as file:
+        writer = csv.writer(file)
+        for day in self.days:
+            writer.writerow(day.cells)
+
+  @classmethod
+  def load_from_csv(cls,days_cnt,mutation_prob,employees,filename):
+      days_data = []
+      with open(filename, 'r') as file:
+          reader = csv.reader(file)
+          for row in reader:
+              days_data.append(row)
+      return cls(days_cnt,mutation_prob,employees,days_data)
