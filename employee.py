@@ -22,7 +22,7 @@ class Employee(object):
         normalized_dict = dict(zip(plot_preference.keys(), scaled_values.flatten()))
 
         self.plot_preference_normalized = normalized_dict
-        print(self.plot_preference_normalized)
+        # print(self.plot_preference_normalized)
 
         #休みに幸福度を設定する可能性。別の言い方をすれば、予定より多く勤務することをどの程度嫌うか
 

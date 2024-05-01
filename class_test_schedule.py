@@ -1,7 +1,9 @@
+import os
 from schedule import Schedule
-from constants import CSV_NAME, DAYS, EMPLOYEES, MUTPB
+from constants import CSV_NAME_CACHE, DATA_DIRECTORY, DAYS, EMPLOYEES, MUTPB
 
-saved_sche = Schedule.load_from_csv(DAYS,MUTPB,EMPLOYEES,CSV_NAME)
+csv_name = os.path.join(DATA_DIRECTORY,"schedule_7.csv")
+saved_sche = Schedule.load_from_csv(DAYS,MUTPB,EMPLOYEES,csv_name)
 saved_sche.calcFitness()
-print(CSV_NAME)
+print(csv_name)
 saved_sche.print()

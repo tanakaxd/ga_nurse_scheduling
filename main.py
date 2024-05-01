@@ -3,7 +3,7 @@ import random
 from employee import Employee
 from shimura import Shimura
 from schedule import Schedule
-from constants import CSV_NAME, DAYS, ELITISM, EMPLOYEES, LOAD, MUTPB, NGEN, POP, SAVE
+from constants import CSV_NAME_CACHE, CSV_NAME_SAVE, DAYS, ELITISM, EMPLOYEES, LOAD, MUTPB, NGEN, DATA_DIRECTORY, POP, SAVE_TO_CACHE
 
 import matplotlib.pyplot as plt
 
@@ -15,8 +15,8 @@ import matplotlib.pyplot as plt
 # random.seed(64)
 pop = []
 
-if LOAD and os.path.exists(CSV_NAME):
-  loaded_sche = Schedule.load_from_csv(DAYS,MUTPB,EMPLOYEES,CSV_NAME)
+if LOAD and os.path.exists(CSV_NAME_CACHE):
+  loaded_sche = Schedule.load_from_csv(DAYS,MUTPB,EMPLOYEES,CSV_NAME_CACHE)
   loaded_sche.print()
   pop.append(loaded_sche)
 
@@ -69,10 +69,41 @@ print("HALL OF FAME")
 print(f'GENERATION:{hof_gen}')
 hall_of_fame.calcFitness()
 hall_of_fame.print()
-if SAVE:
-  hall_of_fame.save_to_csv(CSV_NAME) 
+if SAVE_TO_CACHE:
+  hall_of_fame.save_to_csv(CSV_NAME_CACHE) 
+
+# 出力したいファイル名
+if not os.path.exists(DATA_DIRECTORY):
+    os.makedirs(DATA_DIRECTORY)
+base_filename = CSV_NAME_SAVE
+extension = '.csv'
+filename = base_filename + extension
+
+# 同名のファイルが存在する場合、末尾の番号を増加
+counter = 1
+while os.path.exists(filename):
+    filename =  f"{base_filename}_{counter}{extension}"
+    counter += 1
+hall_of_fame.save_to_csv(filename) 
+print(f'saved to :{filename}')
+
 
 plt.plot(average_fitness_history)
 plt.plot(gen_max_fit_history)
-plt.show()
-plt.savefig()
+plt.title("MAX/AVE FITNESS to GENERATION")
+plt.xlabel("Gen")
+plt.ylabel("Fit")
+# 出力したいファイル名
+base_filename = 'ga_nurse_scheduling\\data\\charts\\fitness_graph'
+extension = '.png'
+filename = base_filename + extension
+
+# 同名のファイルが存在する場合、末尾の番号を増加
+counter = 1
+while os.path.exists(filename):
+    filename = f"{base_filename}_{counter}{extension}"
+    counter += 1
+
+# グラフを画像ファイルとして保存
+plt.savefig(filename)
+# plt.show()
