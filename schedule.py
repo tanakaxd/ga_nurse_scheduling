@@ -64,11 +64,12 @@ class Schedule(object):
     # E/NEは女性陣しかできない:
     # 個人の希望を取り入れる
     # 連勤をできるだけ防ぐ。希望勤務日数に比例するようにする。希望出勤数が多ければ連勤もやむなし
+    # 全員の功利を等しく最大化したいのであれば全体のfitnessは和ではなく積で求めるべきか？
 
     #TODO テーブル割当はできるだけばらけるようにする:
 
-    fitness1,fitness2,fitness3,fitness4,fitness5,fitness6 = 0,0,0,0,0,0
-    weight1,weight2,weight3,weight4,weight5,weight6 = 100,1,30,10,1,10
+    fitness1,fitness2,fitness3,fitness4,fitness5,fitness6 = 0,1,0,0,0,0
+    weight1,weight2,weight3,weight4,weight5,weight6 = 100,100,30,10,1,10
 
     for i, emp in enumerate(self.employees):
       # 週単位での希望勤務日数:(100)
@@ -92,7 +93,7 @@ class Schedule(object):
       # [0,0,5][1,2,2]を[0,0,10][2,4,4]としても全体の功利には変化がない
       utility = np.prod([emp.plot_preference_normalized[plot] for plot in ll])
       self.employees_utility.append(utility)
-      fitness2 += utility
+      fitness2 *= utility
 
 
       # 出勤できない日:(30)

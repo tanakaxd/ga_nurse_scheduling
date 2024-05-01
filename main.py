@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 # 乱数を固定
 # random.seed(64)
 #何世代まで行うか
-NGEN = 100
+NGEN = 1000
 #集団の個体数
 POP = 300
 #個体が突然変異を起こす確率
@@ -30,9 +30,12 @@ DAYS = 31
 #保存されるエリートの世代ごとの個体数
 ELITISM = 1
 #保存するcsvファイルの名前
-CSV_NAME = "schedule.csv"
+CSV_NAME = "schedule2.csv"
 
-a = Employee("OB",4,5,[],{"A":3,"B":1,"C":0,"E":5,"NE":3})
+LOAD = True
+SAVE = True
+
+a = Employee("OB",4,5,[],{"A":3,"B":1,"C":0,"E":5,"NE":3})# [3,1,0,5,3] => []
 b = Employee("T1",4,3,[],{"A":3,"B":5,"C":0,"E":1,"NE":3})
 c = Employee("MO",4,5,[],{"A":1,"B":3,"C":0,"E":3,"NE":5})
 d = Shimura("SM",3,5,[],{"A":3,"B":1,"C":5,"E":0,"NE":0})
@@ -42,11 +45,13 @@ g = Employee("HK",2,3.5,[19],{"A":4,"B":0,"C":0,"E":0,"NE":2})
 
 EMPLOYEES = [a,b,c,d,e,f,g]
 
-loaded_sche = Schedule.load_from_csv(DAYS,MUTPB,EMPLOYEES,CSV_NAME)
-loaded_sche.print()
-
 pop = []
-pop.append(loaded_sche)
+
+if LOAD:
+  loaded_sche = Schedule.load_from_csv(DAYS,MUTPB,EMPLOYEES,CSV_NAME)
+  loaded_sche.print()
+  pop.append(loaded_sche)
+
 while len(pop)<POP:
   pop.append(Schedule(DAYS,MUTPB,EMPLOYEES))
 # pop = [Schedule(DAYS,MUTPB,EMPLOYEES) for _ in range(POP)]
@@ -98,7 +103,8 @@ print("HALL OF FAME")
 print(f'GENERATION:{hof_gen}')
 hall_of_fame.calcFitness()
 hall_of_fame.print()
-hall_of_fame.save_to_csv(CSV_NAME)
+if SAVE:
+  hall_of_fame.save_to_csv(CSV_NAME) 
 
 plt.plot(average_fitness_history)
 plt.plot(gen_max_fit_history)
