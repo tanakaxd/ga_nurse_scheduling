@@ -68,8 +68,8 @@ class Schedule(object):
 
     #TODO テーブル割当はできるだけばらけるようにする:
 
-    fitness1,fitness2,fitness3,fitness4,fitness5,fitness6 = 0,1,0,0,0,0
-    weight1,weight2,weight3,weight4,weight5,weight6 = 100,100,30,10,1,10
+    fitness1,fitness2,fitness3,fitness4,fitness5,fitness6,fitness7 = 0,1,0,0,0,0,0
+    weight1,weight2,weight3,weight4,weight5,weight6,weight7 = 100,100,30,10,1,10,0.1
 
     for i, emp in enumerate(self.employees):
       # 週単位での希望勤務日数:(100)
@@ -123,6 +123,18 @@ class Schedule(object):
         else:
           fitness6 = fitness6 - (max(0,seq - emp.on_duty_per_week))**2
           seq=0
+      
+      # 同じ区画の連続をできるだけ防ぐ:(10)
+      bored = 0
+      threshold = 3
+      previous = None
+      for p in ll:
+        if previous == p:
+          bored+=1
+          fitness7 -= max(0,bored-threshold)
+        else:
+          bored=0
+        previous = p
 
 
 
@@ -142,7 +154,7 @@ class Schedule(object):
     # print(fitness2 * weight2)
     # print(fitness3 * weight3)
 
-    total_fitness = fitness1 * weight1 + fitness2 * weight2 + fitness3 * weight3 + fitness4 * weight4 + fitness5 * weight5 + fitness6 * weight6
+    total_fitness = fitness1 * weight1 + fitness2 * weight2 + fitness3 * weight3 + fitness4 * weight4 + fitness5 * weight5 + fitness6 * weight6 + fitness7 * weight7
     # total_fitness = total_fitness * total_fitness
     # print(f'total_fitness = {total_fitness}')
     self.fitness = max(sys.float_info.epsilon,total_fitness)

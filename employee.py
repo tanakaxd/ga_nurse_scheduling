@@ -11,7 +11,7 @@ class Employee(object):
         self.date_off_duty = date_off_duty
         self.plot_preference = plot_preference
 
-        scaler = MinMaxScaler(feature_range=(0.99, 1.01))
+        scaler = MinMaxScaler(feature_range=(0.95, 1.01))
         # 辞書の値をnumpy配列に変換
         values = np.array(list(plot_preference.values())).reshape(-1, 1)
 

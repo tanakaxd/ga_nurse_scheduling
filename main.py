@@ -1,60 +1,27 @@
+import os
 import random
 from employee import Employee
 from shimura import Shimura
 from schedule import Schedule
+from constants import CSV_NAME, DAYS, ELITISM, EMPLOYEES, LOAD, MUTPB, NGEN, POP, SAVE
 
 import matplotlib.pyplot as plt
 
 #TODO
-# average fitnessの推移をグラフ化
-# エリート保存
-
-# utilityの最適化、担当可能区画の数に応じて標準化する仕様。とりあえず女性かどうかを考慮しないことにする
-
-# 保存したスケジュールからインスタンス化
 # スケジュール部分固定の実装
 # 労働者相性の実装
-# 交配確率の最適化
 
 # 乱数を固定
 # random.seed(64)
-#何世代まで行うか
-NGEN = 1000
-#集団の個体数
-POP = 300
-#個体が突然変異を起こす確率
-# 世代が進むほど局所解の可能性が上がるので徐々に変異率を上げる手法はありか？
-MUTPB = 0.03
-#何日間のスケジュールか
-DAYS = 31
-#保存されるエリートの世代ごとの個体数
-ELITISM = 1
-#保存するcsvファイルの名前
-CSV_NAME = "schedule2.csv"
-
-LOAD = True
-SAVE = True
-
-a = Employee("OB",4,5,[],{"A":3,"B":1,"C":0,"E":5,"NE":3})# [3,1,0,5,3] => []
-b = Employee("T1",4,3,[],{"A":3,"B":5,"C":0,"E":1,"NE":3})
-c = Employee("MO",4,5,[],{"A":1,"B":3,"C":0,"E":3,"NE":5})
-d = Shimura("SM",3,5,[],{"A":3,"B":1,"C":5,"E":0,"NE":0})
-e = Employee("TT",3,4,[],{"A":4,"B":2,"C":3,"E":0,"NE":0})
-f = Employee("ON",2,5,[],{"A":0,"B":2,"C":4,"E":0,"NE":0})
-g = Employee("HK",2,3.5,[19],{"A":4,"B":0,"C":0,"E":0,"NE":2})
-
-EMPLOYEES = [a,b,c,d,e,f,g]
-
 pop = []
 
-if LOAD:
+if LOAD and os.path.exists(CSV_NAME):
   loaded_sche = Schedule.load_from_csv(DAYS,MUTPB,EMPLOYEES,CSV_NAME)
   loaded_sche.print()
   pop.append(loaded_sche)
 
 while len(pop)<POP:
   pop.append(Schedule(DAYS,MUTPB,EMPLOYEES))
-# pop = [Schedule(DAYS,MUTPB,EMPLOYEES) for _ in range(POP)]
 gen_cnt = 0
 average_fitness_history = []
 gen_max_fit_history = []
@@ -83,7 +50,6 @@ for i in range(NGEN):
   elif hall_of_fame.fitness<fittest_schedule.fitness:
     hall_of_fame = fittest_schedule
     hof_gen = gen_cnt
-
   fittest_schedule.print()
 
   # intercourse
@@ -109,3 +75,4 @@ if SAVE:
 plt.plot(average_fitness_history)
 plt.plot(gen_max_fit_history)
 plt.show()
+plt.savefig()
