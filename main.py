@@ -3,12 +3,13 @@ import random
 from employee import Employee
 from shimura import Shimura
 from schedule import Schedule
-from constants import CSV_NAME_CACHE, CSV_NAME_SAVE, DAYS, ELITISM, EMPLOYEES, LOAD, MUTPB, NGEN, DATA_DIRECTORY, POP, SAVE_TO_CACHE
+from constants import CSV_NAME_CACHE, CSV_NAME_SAVE, DAYS, ELITISM, EMPLOYEES, FIXED_DATE_PLOT, LOAD, MUTPB, NGEN, DATA_DIRECTORY, POP, SAVE_TO_CACHE
 
 import matplotlib.pyplot as plt
 
 #TODO
-# スケジュール部分固定の実装
+# スケジュール部分固定の実装 => 交配結果を部分的に固定する？fitness計算では配慮しないのであれば、突然変異処理の後でなければならない
+#                             休日希望日のようにインスタンス化の際に固定で作り、交配には関与せず、fitnessで評価するのがGAとして一貫していてよさそう
 # 労働者相性の実装
 
 # 乱数を固定
@@ -16,12 +17,13 @@ import matplotlib.pyplot as plt
 pop = []
 
 if LOAD and os.path.exists(CSV_NAME_CACHE):
-  loaded_sche = Schedule.load_from_csv(DAYS,MUTPB,EMPLOYEES,CSV_NAME_CACHE)
+  loaded_sche = Schedule.load_from_csv(DAYS,MUTPB,EMPLOYEES,FIXED_DATE_PLOT,CSV_NAME_CACHE)
+  loaded_sche.calcFitness()
   loaded_sche.print()
   pop.append(loaded_sche)
 
 while len(pop)<POP:
-  pop.append(Schedule(DAYS,MUTPB,EMPLOYEES))
+  pop.append(Schedule(DAYS,MUTPB,EMPLOYEES,FIXED_DATE_PLOT))
 gen_cnt = 0
 average_fitness_history = []
 gen_max_fit_history = []

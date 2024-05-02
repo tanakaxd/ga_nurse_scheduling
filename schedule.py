@@ -8,7 +8,7 @@ import numpy as np
 
 class Schedule(object):
 
-  def __init__(self,days_cnt,mutation_prob,employees,days_data=None):
+  def __init__(self,days_cnt,mutation_prob,employees,fixed_date_plot,days_data=None):
     self.fitness = 0 #0-1の値
     self.weighted_fitness_list = []
     self.days_cnt = days_cnt
@@ -16,6 +16,8 @@ class Schedule(object):
     self.employees = employees
     self.employees_utility = []
     self.employees_on_duty_cnt = []
+    self.fixed_date_plot = fixed_date_plot
+
     self.starting_weekday_of_month = Weekday.WEDNESDAY
     # 特定の日を固定で休日にする。連休などの計算に必要になる:
     self.closed_weekday = Weekday.WEDNESDAY
@@ -23,19 +25,32 @@ class Schedule(object):
       self.days = [Day(i+1,self.starting_weekday_of_month,self.closed_weekday,len(self.employees),day_data) for i,day_data in enumerate(days_data)]
     else:
       self.days = [Day(i+1,self.starting_weekday_of_month,self.closed_weekday,len(self.employees)) for i in range(self.days_cnt)]
-      # 日にち:休み希望者というディクショナリをつくる。日にちをkeyにするのは、同日はemp単位ではなくまとめて書き換えたいから
-      day_off_dict = {}
+
+      # 休みと出勤を両方同時に固定するにはまとめて処理する必要がある。TODO constantsの時点で、固定区画も休日希望も統合してしまえばよい？
+      # まず、日にち:{労働者ID:"R"}という休み希望のディクショナリをつくる。日にちをkeyにするのは、同日はemp単位ではなくまとめて書き換えたいから
+      # {7:{6:"R"},19:{6:"R"}}
+      date_emp_plot_dict = {}
       for emp_index,emp in enumerate(employees):
         for date in emp.date_off_duty:
-          if date not in day_off_dict:
-              day_off_dict[date] = [emp_index]
+          if date not in date_emp_plot_dict:
+            date_emp_plot_dict[date] = {emp_index:"R"}
           else:
-              day_off_dict[date].append(emp_index)
+            date_emp_plot_dict[date][emp_index]="R"
+      # 次に、日にち:{労働者ID:固定区画}を加える。
+      # {5:{3:"C",5:"C"},6:{3:"C",5:"C"},7:{3:"C",5:"C"}}
+      #  => {5:{3:"C",5:"C"},6:{3:"C",5:"C"},7:{3:"C",5:"C",6:"R"},19:{6:"R"}}
+      for date,emp_plot in self.fixed_date_plot.items():
+        if date not in date_emp_plot_dict:
+          date_emp_plot_dict[date] = copy.copy(emp_plot)
+        else:
+          for e, p in emp_plot.items():
+            date_emp_plot_dict[date][e]=p
+
       # ディクショナリをループし、dayのcellsを書き換える
       # ただし、cellsの割り当てバランスを崩してはいけないので、固定してシャッフルする必要がある
       # その責任はdayクラスに持たせる
-      for key,value in day_off_dict.items():
-        self.days[key-1].fixed_R_shuffle(value)
+      for key,value in date_emp_plot_dict.items():
+        self.days[key-1].fixed_merge_shuffle(value)
   
   def print(self):
     print(f'Schedule(fitness={self.fitness})')
@@ -47,7 +62,7 @@ class Schedule(object):
     print(f'Utilities_Fraction{[round(u,1) for u in self.weighted_fitness_list]})')
   
   def cross(self, another):
-    child = Schedule(len(self.days),self.mutation_prob,self.employees)
+    child = Schedule(len(self.days),self.mutation_prob,self.employees,self.fixed_date_plot)
     for i, _ in enumerate(child.days):
         # 親の日のdeepcopyを子供の日に設定
         child.days[i] = copy.deepcopy(random.choice([self.days[i], another.days[i]]))
@@ -95,6 +110,9 @@ class Schedule(object):
       fitness2 *= utility
 
       # 3.出勤できない日:(30)
+      # scheduleインスタンスがインスタンス化されるときに休み希望を考慮している。
+      # そのあと交配時に突然変異で塗り替えられる可能性はあるが、ここでつまりfitness計算時にネガティブな補正がつけられる。つまり、二重に対応している
+      # 
       # 一つでも当てはまったら即却下でもいいかもしれないがループを二重に抜ける必要がある
       # 即最低値にすると全個体が実践的には最低評価になってしまうので、禁止事項を満たすほどマイナスを増やしていく
       # emp一人の、つまり縦の{日付、区画}ディクショナリを作る
@@ -162,11 +180,11 @@ class Schedule(object):
             writer.writerow(day.cells)
 
   @classmethod
-  def load_from_csv(cls,days_cnt,mutation_prob,employees,filename):
+  def load_from_csv(cls,days_cnt,mutation_prob,employees,fixed_date_plot,filename):
       days_data = []
       with open(filename, 'r') as file:
           reader = csv.reader(file)
           for row in reader:
               days_data.append(row)
       print("loaded successfully")
-      return cls(days_cnt,mutation_prob,employees,days_data)
+      return cls(days_cnt,mutation_prob,employees,fixed_date_plot,days_data)
