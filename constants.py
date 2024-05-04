@@ -3,9 +3,9 @@ from employee import Employee
 from shimura import Shimura
 
 #何世代まで行うか
-NGEN = 1
+NGEN = 1000
 #集団の個体数
-POP = 2
+POP = 300
 #個体が突然変異を起こす確率
 # 世代が進むほど局所解の可能性が上がるので徐々に変異率を上げる手法はありか？
 MUTPB = 0.03
@@ -32,4 +32,4 @@ g = Employee("HK",2,3.5,[7,19],{"A":4,"B":-10,"C":-10,"E":-10,"NE":2})
 
 EMPLOYEES = [a,b,c,d,e,f,g]
 
-FIXED_DATE_PLOT = {5:{3:"C",5:"C"},6:{3:"C",5:"C"},7:{3:"C",5:"C"}}
+FIXED_DATE_PLOT = {5:{3:"C",5:"C"},6:{3:"C",5:"C"},7:{3:"C",5:"C"},10:{0:"A",6:"A"},11:{0:"A",6:"A"},12:{4:"A",6:"A"}}
