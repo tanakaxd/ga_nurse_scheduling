@@ -22,7 +22,7 @@ class Day(object):
   def mutate(self):
     # mutationをもっと革新的にする必要があるかも
     # 1.全く新しいcellsを生み出すこと
-    # 2.オーソドックスなcells以外の例えばダブり持ちcellsがほしい
+    # 2.オーソドックスなcells以外の例えばダブり持ちcellsがほしい => 現時点では実装しない。ダブりなどは固定上書きでfitness度外視で絶対実現する方針
     idx1, idx2 = random.sample(range(len(self.cells)), 2)
     # 選択した2つの要素を入れ替え
     self.cells[idx1], self.cells[idx2] = self.cells[idx2], self.cells[idx1]

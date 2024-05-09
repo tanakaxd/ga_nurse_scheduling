@@ -22,6 +22,9 @@ import matplotlib.pyplot as plt
 # そしてfitnessの計算式から除外すべきかもしれない
 
 # 労働者相性の実装
+# LONGの実装
+# preferenceの再ロード => fitnessの計算構造上かなり抜本的変更が必要になる。とりあえずは固定シフトで様子見
+# CSV＝＞固定区画の変換
 
 # 乱数を固定
 # random.seed(64)
