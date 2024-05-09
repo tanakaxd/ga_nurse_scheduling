@@ -3,7 +3,7 @@ import random
 from employee import Employee
 from shimura import Shimura
 from schedule import Schedule
-from constants import CSV_NAME_CACHE, CSV_NAME_SAVE, DAYS, ELITISM, EMPLOYEES, FIXED_DATE_PLOT, LOAD, MUTPB, NGEN, DATA_DIRECTORY, POP, SAVE_TO_CACHE
+from constants import CSV_NAME_CACHE, CSV_NAME_LOAD, CSV_NAME_SAVE, DAYS, ELITISM, EMPLOYEES, FIXED_DATE_PLOT, LOAD, MUTPB, NGEN, DATA_DIRECTORY, POP, SAVE_TO_CACHE
 
 import matplotlib.pyplot as plt
 
@@ -30,8 +30,8 @@ import matplotlib.pyplot as plt
 # random.seed(64)
 pop = []
 
-if LOAD and os.path.exists(CSV_NAME_CACHE):
-  loaded_sche = Schedule.load_from_csv(DAYS,MUTPB,EMPLOYEES,FIXED_DATE_PLOT,CSV_NAME_CACHE)
+if LOAD and os.path.exists(CSV_NAME_LOAD):
+  loaded_sche = Schedule.load_from_csv(DAYS,MUTPB,EMPLOYEES,FIXED_DATE_PLOT,CSV_NAME_LOAD)
   loaded_sche.calcFitness()
   loaded_sche.print()
   pop.append(loaded_sche)
