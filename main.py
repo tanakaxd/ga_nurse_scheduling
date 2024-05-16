@@ -23,8 +23,7 @@ import matplotlib.pyplot as plt
 
 # 労働者相性の実装
 # LONGの実装
-# preferenceの再ロード => fitnessの計算構造上かなり抜本的変更が必要になる。とりあえずは固定シフトで様子見
-# CSV＝＞固定区画の変換
+# preferenceの再ロード => fitnessの計算部分を作り替えると構造上かなり抜本的変更が必要になるが、wishで個別に別レイヤーを使って実現は可能。とりあえずは固定シフトで様子見
 
 # 乱数を固定
 # random.seed(64)
