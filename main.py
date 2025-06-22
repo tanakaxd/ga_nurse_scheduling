@@ -109,7 +109,7 @@ plt.title("MAX/AVE FITNESS to GENERATION")
 plt.xlabel("Gen")
 plt.ylabel("Fit")
 # 出力したいファイル名
-base_filename = 'ga_nurse_scheduling\\data\\charts\\fitness_graph'
+base_filename = '/home/ttnk0/projects/ga_nurse_scheduling/data/charts/fitness_graph'
 extension = '.png'
 filename = base_filename + extension
 

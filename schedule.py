@@ -17,7 +17,7 @@ class Schedule(object):
     self.employees_utility = []
     self.employees_on_duty_cnt = []
     self.fixed_date_plot = fixed_date_plot
-    self.starting_weekday_of_month = Weekday.WEDNESDAY
+    self.starting_weekday_of_month = Weekday.TUESDAY
     self.closed_weekday = Weekday.WEDNESDAY# 特定の日を固定で休日にする。連休などの計算に必要になる
     
     if days_data is not None:
@@ -41,6 +41,9 @@ class Schedule(object):
     # また、インスタンス化時点でg_modify()されているので固定区画は満たしている
     child = Schedule(len(self.days),self.mutation_prob,self.employees,self.fixed_date_plot)
     for i, _ in enumerate(child.days):
+        # 閉店日（水曜日）は交叉処理をスキップして全員休みを維持
+        if child.days[i].is_closed_day:
+            continue
         if not random.random() < self.mutation_prob:# 突然変異したときは何もしない
             # 親の日のdeepcopyを子供の日に設定
             child.days[i] = copy.deepcopy(random.choice([self.days[i], another.days[i]]))

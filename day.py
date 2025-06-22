@@ -47,6 +47,10 @@ class Day(object):
 
   def fixed_merge_shuffle(self,emp_plot_dict):#{3:"C",5:"C",6:"R"}
     
+    # 閉店日の場合は固定区画処理をスキップ（全員休みを維持）
+    if self.is_closed_day:
+        return
+    
     # cellsの最低要件は区画ごとに最低一人の担当者が存在すること
     elements = ["A", "B", "C", "E", "NE"]
     array = ["X"] * self.emp_cnt

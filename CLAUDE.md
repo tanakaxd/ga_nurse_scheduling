@@ -6,11 +6,69 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a genetic algorithm-based nurse scheduling system written in Python. The system optimizes shift assignments for healthcare workers based on multiple constraints and preferences including individual work preferences, availability, and operational requirements.
 
+## Initial Setup Requirements
+
+### Required Dependencies
+Install the following Python packages:
+```bash
+pip install matplotlib numpy scikit-learn
+```
+Standard library modules used: `csv`, `random`, `os`, `sys`, `copy`
+
+### Directory Structure Setup
+The application requires the following directory structure:
+```
+ga_nurse_scheduling/
+├── data/
+│   ├── _fixed_plot.csv          # Required: Fixed shift assignments
+│   ├── charts/                  # Auto-created: Fitness graph outputs
+│   ├── schedule_cache.csv       # Optional: Cached best schedule for warm start
+│   └── schedule_*.csv           # Auto-generated: Final schedule outputs
+```
+
+### Required Configuration Files
+
+#### 1. Fixed Plot Assignment File (`data/_fixed_plot.csv`)
+**Critical requirement**: This file must exist before running the application.
+
+Format: CSV with 31 rows (days) × 7 columns (employees), where:
+- `X` = No fixed assignment (algorithm decides)
+- `A`, `B`, `C`, `E`, `NE` = Fixed shift assignment
+- `R` = Fixed rest day
+
+Example structure:
+```csv
+X,X,X,X,X,X,X
+X,X,X,X,X,R,NE
+X,X,X,C,X,C,NE
+A,X,X,X,X,X,A
+```
+
+#### 2. Employee Configuration (`constants.py`)
+Modify the `EMPLOYEES` list to match your workforce:
+```python
+EMPLOYEES = [
+    Employee("Name", able_to_cnt, desired_weekly_hours, unavailable_dates, preferences),
+    # Add/modify employees as needed
+]
+```
+
+Where:
+- `able_to_cnt`: Number of different shift types employee can handle
+- `desired_weekly_hours`: Target weekly work hours  
+- `unavailable_dates`: List of dates employee cannot work
+- `preferences`: Dictionary of shift preferences (use -100 for impossible assignments)
+
+### Optional Cache System
+- Set `LOAD = True` in `constants.py` to load cached schedules for warm start
+- Set `SAVE_TO_CACHE = True` to save best results for future runs
+- Cache file: `data/schedule_cache.csv` (auto-generated after first successful run)
+
 ## Running the Application
 
 - **Main execution**: `python main.py`
-- **Dependencies**: Standard Python libraries (matplotlib, numpy, sklearn, csv, random)
-- **Data files**: The system reads from CSV files in the `data/` directory for fixed shift assignments and saves outputs there
+- **Output**: Generates schedule CSV files and fitness graphs in `data/` directory
+- **Runtime**: Typically 1000 generations with population of 300 (configurable in `constants.py`)
 
 ## Core Architecture
 
