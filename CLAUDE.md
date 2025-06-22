@@ -180,3 +180,110 @@ The system implements a **dual-layer constraint approach** to handle hard constr
 - The system demonstrates sophisticated understanding of multi-objective optimization challenges in workforce scheduling
 - Architecture prioritizes both algorithmic soundness and practical applicability
 - Extensive TODO comments indicate planned enhancements for worker compatibility, preference reloading, and constraint system improvements
+
+## Common Issues and Solutions
+
+### Issue 1: Closed Days (Wednesday) Not Preserved Across Generations
+
+**Problem**: Wednesday (closed day) shows work assignments after several generations despite `is_closed_day` flag.
+
+**Root Causes**:
+1. **Crossover processing**: `Schedule.cross()` method overwrites closed days with parent data that may contain work assignments
+2. **Fixed constraint processing**: `Day.fixed_merge_shuffle()` ignores `is_closed_day` and forces shift assignments even on closed days
+
+**Solution**:
+```python
+# In schedule.py:cross() - Skip crossover for closed days
+if child.days[i].is_closed_day:
+    continue
+
+# In day.py:fixed_merge_shuffle() - Skip processing for closed days  
+if self.is_closed_day:
+    return
+```
+
+### Issue 2: Evolution Halts (Generation Updates Stop)
+
+**Problem**: All individuals converge to same near-zero fitness (`sys.float_info.epsilon`), causing evolution to halt.
+
+**Root Cause**: Large negative penalty values (e.g., -1400) in fitness calculation cause `total_fitness` to be negative, which gets clamped to epsilon by `max(sys.float_info.epsilon, total_fitness)`.
+
+**Solution**: Transform negative fitness values to small positive values:
+```python
+# In schedule.py:calcFitness()
+if total_fitness <= 0:
+    # Convert negative values to small positive values
+    self.fitness = 1.0 / (1.0 + abs(total_fitness))
+else:
+    self.fitness = total_fitness
+```
+
+**Technical Details**:
+- Worse schedules (larger negative values) get smaller positive fitness
+- Maintains selection pressure while avoiding zero-fitness convergence
+- Preserves relative ranking between individuals
+
+### Issue 3: Debugging Evolution Problems
+
+**Diagnostic Steps**:
+1. Check `AVERAGE` fitness in output - if all near-zero, fitness transformation issue
+2. Verify `Utilities_Fraction` values - large negatives indicate constraint violations
+3. Monitor if same schedule prints repeatedly - indicates halted evolution
+4. Check water/closed day assignments in output - should remain all 'R'
+
+**Key Monitoring Values**:
+- `fitness2` (preference satisfaction): Should use geometric mean, not zero
+- `fitness5` (individual wishes): Employee-specific constraints
+- `fitness8` (fixed constraints): Heaviest penalty weight (100)
+
+## Data Format and Field Definitions
+
+### Schedule CSV Structure
+The original schedule files use a specific format with paired columns for each employee:
+
+**Column Structure**: `[日付, 曜日, 員工名1, メガネ割当1, 員工名2, メガネ割当2, ..., 備考, cnt, vld, メガネ]`
+
+### Field Definitions
+- **Alphabet (A, B, C, E, NE)**: 清掃区画の割当 (Cleaning area assignments)
+  - Each cleaning area must be assigned to exactly one person per day (with education day exceptions)
+  - If assigned a cleaning area → employee is working that day
+- **Numbers (1-5)**: メガネコーナーの割当番号 (Glasses corner assignment numbers)  
+  - 5 people are assigned unique numbers 1-5 each day
+  - Only assigned to employees who are working (have cleaning assignments)
+- **'休'**: Rest day (no assignments)
+- **'C/D'**: Special cleaning assignment notation
+
+### Assignment Rules for Restoration
+1. **Cleaning area assignment** → **Employee is working** → **Requires glasses corner number**
+2. **No cleaning assignment** → **Employee is resting** → **No glasses corner number**
+3. **Numbers 1-5 must be uniquely distributed** among working employees
+4. **Cleaning areas A,B,C,E,NE must be assigned** (except during education days)
+
+### Complete Workflow: Transform → GA Optimization → Restore
+
+#### 1. Forward Transform (`transform_schedule_with_metadata()`)
+- **Input**: Original Japanese schedule CSV with all metadata
+- **Process**: Extract only cleaning assignments (A,B,C,E,NE,R) for GA processing
+- **Output**: Simplified CSV + metadata JSON (preserving all lost information)
+- **Purpose**: Prepare data for genetic algorithm optimization
+
+#### 2. GA Optimization (`main.py`)
+- **Input**: Simplified CSV with cleaning assignments only
+- **Process**: Genetic algorithm optimizes shift assignments based on:
+  - Employee preferences and constraints
+  - Workload distribution
+  - Operational requirements
+- **Output**: **NEW optimized** cleaning assignments
+- **Important**: GA modifies the cleaning assignments - this is the core optimization
+
+#### 3. Reverse Transform (`perfect_inverse_transform_improved()`)
+- **Input**: GA-optimized CSV + original metadata JSON
+- **Process**: 
+  - Use **NEW optimized cleaning assignments** (not original ones)
+  - Reconstruct glasses corner numbers (1-5) based on who is working
+  - Restore all other metadata (dates, remarks, etc.) from JSON
+- **Output**: Complete Japanese schedule with optimized assignments
+- **Validation**: Ensure glasses number uniqueness and work status consistency
+
+#### Key Principle
+**The cleaning assignments in the final output reflect GA optimization results, not original assignments. Only supporting metadata (dates, structure, etc.) is restored from the original file.**

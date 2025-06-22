@@ -160,7 +160,16 @@ class Schedule(object):
       self.weighted_fitness_list = [f*w for f,w in zip(fitness_list,weight_list)]
       total_fitness = sum(self.weighted_fitness_list)
       # print(f'total_fitness = {total_fitness}')
-      self.fitness = max(sys.float_info.epsilon,total_fitness)#0以下にならないように処理。全個体が０以下になると子孫を残せなくなる
+      
+      # 負のフィットネスを正の値に変換（オフセット + 指数変換）
+      if total_fitness <= 0:
+          # 負の値を小さな正の値に変換（-1000 -> 0.001, -100 -> 0.01 程度）
+          self.fitness = 1.0 / (1.0 + abs(total_fitness))
+      else:
+          self.fitness = total_fitness
+      
+      # 最小値保証
+      self.fitness = max(sys.float_info.epsilon, self.fitness)
       # print(f'self.fitness = {self.fitness}')
     
 
