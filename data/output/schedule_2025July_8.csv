@@ -1,4 +1,4 @@
-E,NE,C,A,R,R,B,R,R,R
+E,NE,C,A,R,R,R,R,B,R
 R,R,R,R,R,R,R,R,R,R
 E,NE,C,A,B,R,R,R,R,R
 R,E,C,A,NE,R,B,R,R,R
@@ -8,17 +8,17 @@ E,NE,A,C,R,R,B,R,R,R
 E,R,C,A,R,R,R,NE,B,R
 R,R,R,R,R,R,R,R,R,R
 E,B,C,R,A,R,NE,R,R,R
-R,E,C,A,B,R,R,NE,R,R
+R,E,C,A,B,R,R,R,NE,R
 R,NE,A,C,B,E,R,R,R,R
-R,R,C,A,R,E,B,NE,R,R
+R,R,C,A,NE,E,B,R,R,R
 A,E,R,C,NE,R,B,R,R,R
 E,NE,A,C,R,R,B,R,R,R
 R,R,R,R,R,R,R,R,R,R
 E,NE,C,A,B,R,R,R,R,R
-R,R,C,A,B,R,E,NE,R,R
-E,B,R,C,NE,NE,R,R,R,A
+R,R,C,A,E,R,R,NE,B,R
+B,E,R,A,NE,NE,C,R,R,R
 R,NE,C,A,R,NE,B,E,R,R
-A,E,R,R,R,R,B,NE,R,C
+E,B,R,R,A,R,C,R,NE,R
 E,NE,A,C,B,R,R,R,R,R
 R,R,R,R,R,R,R,R,R,R
 E,A,C,R,B,R,R,NE,R,R
@@ -26,6 +26,6 @@ R,E,C,A,NE,R,B,R,R,R
 E,B,R,C,A,NE,R,R,R,R
 R,E,A,C,R,NE,B,R,R,R
 NE,E,R,C,A,R,R,R,B,R
-E,R,C,A,NE,R,R,R,R,B
+E,R,C,NE,A,R,B,R,R,R
 R,R,R,R,R,R,R,R,R,R
-E,NE,C,B,A,R,R,R,R,R
+NE,E,C,A,B,R,R,R,R,R

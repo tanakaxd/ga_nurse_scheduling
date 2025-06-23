@@ -3,9 +3,9 @@ import random
 from weekday import Weekday
 
 class Day(object):
-  def __init__(self,date,starting_weekday_of_month,closed_weekday,emp_cnt,cells=None):
+  def __init__(self, *, date, starting_weekday_of_month, closed_weekday, emp_cnt, cells=None):
     self.date = date
-    self.weekday = Weekday.weekday_from_date(starting_weekday_of_month,self.date)
+    self.weekday = Weekday.weekday_from_date(starting_weekday_of_month=starting_weekday_of_month, date=self.date)
     self.is_closed_day = self.weekday == closed_weekday
     self.emp_cnt = emp_cnt
     if cells is not None:
@@ -27,7 +27,7 @@ class Day(object):
     # 選択した2つの要素を入れ替え
     self.cells[idx1], self.cells[idx2] = self.cells[idx2], self.cells[idx1]
 
-  def fixed_R_shuffle(self,fixed_indeces):
+  def fixed_R_shuffle(self, *, fixed_indeces):
     # cellsから固定するR要素を休み希望人数分除去する
     for _ in range(len(fixed_indeces)):
       self.cells.remove("R")
@@ -37,15 +37,15 @@ class Day(object):
     for i in sorted(fixed_indeces):
         self.cells.insert(i, "R")
 
-  def fixed_plot_shuffle(self,fixed_indeces,plot):
-    self.dup_plot(plot)
+  def fixed_plot_shuffle(self, *, fixed_indeces, plot):
+    self.dup_plot(plot=plot)
     while plot in self.cells:
       self.cells.remove(plot)
     random.shuffle(self.cells)
     for i in sorted(fixed_indeces):
         self.cells.insert(i, plot)
 
-  def fixed_merge_shuffle(self,emp_plot_dict):#{3:"C",5:"C",6:"R"}
+  def fixed_merge_shuffle(self, *, emp_plot_dict):#{3:"C",5:"C",6:"R"}
     
     # 閉店日の場合は固定区画処理をスキップ（全員休みを維持）
     if self.is_closed_day:
@@ -76,7 +76,7 @@ class Day(object):
     self.cells = array
     
     
-  def dup_plot(self,plot):
+  def dup_plot(self, *, plot):
     while len([cell for cell in self.cells if cell==plot])<2:
       self.cells.remove("R")
       self.cells.append(plot)

@@ -1,6 +1,6 @@
 import csv
 
-def transform_schedule(input_file):
+def transform_schedule(*, input_file):
     # Initialize the output list
     output = []
     
@@ -37,7 +37,7 @@ def transform_schedule(input_file):
 if __name__ == "__main__":
     input_file = "/home/ttnk0/projects/ga_nurse_scheduling/data/岡田眼科202507シフト表 - fixed_plot.csv"
     output_file = "/home/ttnk0/projects/ga_nurse_scheduling/data/_fixed_plot.csv"
-    result = transform_schedule(input_file)
+    result = transform_schedule(input_file=input_file)
     
     # Write to CSV file
     with open(output_file, 'w', encoding='utf-8', newline='') as file:

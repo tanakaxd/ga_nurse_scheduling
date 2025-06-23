@@ -1,6 +1,6 @@
 import csv
 
-def csv_to_dict(filename):
+def csv_to_dict(*, filename):
     result = {}
     with open(filename, 'r') as file:
         reader = csv.reader(file)

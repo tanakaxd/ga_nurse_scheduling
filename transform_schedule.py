@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from inverse_transform_schedule import perfect_inverse_transform_improved, validate_schedule_restoration, inverse_transform_schedule
 
-def transform_schedule_with_metadata(input_file, save_metadata=True):
+def transform_schedule_with_metadata(*, input_file, save_metadata=True):
     """
     メタデータ保存機能付きスケジュール変換
     """
@@ -99,11 +99,11 @@ def transform_schedule_with_metadata(input_file, save_metadata=True):
 
 # 逆変換機能はinverse_transform_schedule.pyからインポート
 
-def transform_schedule(input_file):
+def transform_schedule(*, input_file):
     """
     従来の変換関数（後方互換性のため保持）
     """
-    result, _ = transform_schedule_with_metadata(input_file, save_metadata=False)
+    result, _ = transform_schedule_with_metadata(input_file=input_file, save_metadata=False)
     return result
 
 # Example usage
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     
     print("=== メタデータ付き正変換テスト ===")
     try:
-        result, metadata = transform_schedule_with_metadata(input_file, save_metadata=True)
+        result, metadata = transform_schedule_with_metadata(input_file=input_file, save_metadata=True)
         
         # Write to CSV file
         with open(output_file, 'w', encoding='utf-8', newline='') as file:

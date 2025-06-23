@@ -4,11 +4,12 @@ import random
 import sys
 from day import Day
 from weekday import Weekday
+from advance import Advance
 import numpy as np
 
 class Schedule(object):
 
-  def __init__(self,days_cnt,mutation_prob,employees,fixed_date_plot,days_data=None):
+  def __init__(self, *, days_cnt, mutation_prob, employees, fixed_date_plot, days_data=None):
     self.fitness = 0 #0-1の値
     self.weighted_fitness_list = []
     self.days_cnt = days_cnt
@@ -21,9 +22,9 @@ class Schedule(object):
     self.closed_weekday = Weekday.WEDNESDAY# 特定の日を固定で休日にする。連休などの計算に必要になる
     
     if days_data is not None:
-      self.days = [Day(i+1,self.starting_weekday_of_month,self.closed_weekday,len(self.employees),day_data) for i,day_data in enumerate(days_data)]
+      self.days = [Day(date=i+1, starting_weekday_of_month=self.starting_weekday_of_month, closed_weekday=self.closed_weekday, emp_cnt=len(self.employees), cells=day_data) for i,day_data in enumerate(days_data)]
     else:
-      self.days = [Day(i+1,self.starting_weekday_of_month,self.closed_weekday,len(self.employees)) for i in range(self.days_cnt)]
+      self.days = [Day(date=i+1, starting_weekday_of_month=self.starting_weekday_of_month, closed_weekday=self.closed_weekday, emp_cnt=len(self.employees)) for i in range(self.days_cnt)]
       self.genetically_modify()
 
 
@@ -36,10 +37,10 @@ class Schedule(object):
     print(f'Plot_Hapiness{[round(u,2) for u in self.employees_utility]})')
     print(f'Utilities_Fraction{[round(u,1) for u in self.weighted_fitness_list]})')
   
-  def cross(self, another):
+  def cross(self, *, another):
     # そもそもランダムな子供を生成してそれを親の遺伝子で上書きしているので、上書きをしないことは突然変異と同義
     # また、インスタンス化時点でg_modify()されているので固定区画は満たしている
-    child = Schedule(len(self.days),self.mutation_prob,self.employees,self.fixed_date_plot)
+    child = Schedule(days_cnt=len(self.days), mutation_prob=self.mutation_prob, employees=self.employees, fixed_date_plot=self.fixed_date_plot)
     for i, _ in enumerate(child.days):
         # 閉店日（水曜日）は交叉処理をスキップして全員休みを維持
         if child.days[i].is_closed_day:
@@ -55,12 +56,13 @@ class Schedule(object):
     # 満たしていない場合改変するがcellsの割り当てバランスを崩してはいけないので、一部固定した上でシャッフルする必要がある
     # その責任はdayクラスに持たせる
     for date,emp_plot_dict in self.fixed_date_plot.items():
-      self.days[date-1].fixed_merge_shuffle(emp_plot_dict) 
+      self.days[date-1].fixed_merge_shuffle(emp_plot_dict=emp_plot_dict) 
 
   def calcFitness(self):
       # TODO
       # 週単位での希望勤務日数:
       # 割り当て区画の幸福度:
+      # 割り当て区画の習得：特定の日以降はplot_preferenceが変更される
       # 出勤できない日:
       # E/NEは女性陣しかできない:
       # 個人の希望を取り入れる
@@ -80,8 +82,23 @@ class Schedule(object):
         l = [d.cells[i] for d in self.days] 
         ll = list(filter(lambda x: x!="R", l)) 
         self.employees_on_duty_cnt.append(len(ll))
-        # 希望とカウント数の差の絶対値を合計する
-        fitness1 += abs(len(ll) - emp.on_duty_per_week/7*len(self.days))#TODO とりあえず週単位ではなく月単位での出勤予定数で評価
+        
+        # 通常従業員: 希望勤務日数との差の絶対値でペナルティ
+        # Advance従業員: 希望勤務日数より多く働くことは許容するが、少ない方が良い
+        # これにより全体の必要勤務日数が希望日数を上回る場合、Advance従業員の勤務が少なくなる
+        expected_days = emp.on_duty_per_week/7*len(self.days)
+        
+        if not isinstance(emp, Advance):
+            # 通常従業員: 希望日数からのずれを等しくペナルティとする
+            fitness1 += abs(len(ll) - expected_days)
+        else:
+            # Advance従業員: 希望日数以下なら良い、超過は軽いペナルティ
+            if len(ll) <= expected_days:
+                # 希望日数以下の場合: 少ないほど良い（ボーナス）
+                fitness1 += max(0, expected_days - len(ll)) * 0.5  # ボーナス係数
+            else:
+                # 希望日数超過の場合: 軽いペナルティ（通常従業員より寛容）
+                fitness1 += (len(ll) - expected_days) * 0.2  # 軽いペナルティ係数
         
         # 2.割り当て区画の幸福度:(100)
         # 単純に全員の幸福度をすべて合算するアプローチ
@@ -115,7 +132,7 @@ class Schedule(object):
         # 4.
 
         # 5.それぞれ独自のwishを満たしているか評価:(1)TODO 
-        fitness5 += emp.wish(self,i)
+        fitness5 += emp.wish(schedule=self, index=i)
 
         # 6.連勤をできるだけ防ぐ:(10)
         seq = 0
@@ -180,18 +197,18 @@ class Schedule(object):
     self.employees_on_duty_cnt = []
 
 
-  def save_to_csv(self, filename):
+  def save_to_csv(self, *, filename):
     with open(filename, 'w', newline='') as file:
         writer = csv.writer(file)
         for day in self.days:
             writer.writerow(day.cells)
 
   @classmethod
-  def load_from_csv(cls,days_cnt,mutation_prob,employees,fixed_date_plot,filename):
+  def load_from_csv(cls, *, days_cnt, mutation_prob, employees, fixed_date_plot, filename):
       days_data = []
       with open(filename, 'r') as file:
           reader = csv.reader(file)
           for row in reader:
               days_data.append(row)
       print("loaded successfully")
-      return cls(days_cnt,mutation_prob,employees,fixed_date_plot,days_data)
+      return cls(days_cnt=days_cnt, mutation_prob=mutation_prob, employees=employees, fixed_date_plot=fixed_date_plot, days_data=days_data)

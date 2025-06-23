@@ -3,7 +3,7 @@ import json
 import random
 from datetime import datetime, timedelta
 
-def perfect_inverse_transform_improved(input_file, metadata_file=None, output_file=None):
+def perfect_inverse_transform_improved(*, input_file, metadata_file=None, output_file=None):
     """
     メタデータを使用した完全復元（改善版）
     GAで最適化された清掃区画割り当てに基づいてメガネ番号を適切に割り当て
@@ -149,7 +149,7 @@ def perfect_inverse_transform_improved(input_file, metadata_file=None, output_fi
     print(f"改善された完全復元完了: {output_file}")
     return output_data
 
-def validate_schedule_restoration(restored_data, metadata):
+def validate_schedule_restoration(*, restored_data, metadata):
     """
     復元されたスケジュールのバリデーション
     
@@ -199,7 +199,7 @@ def validate_schedule_restoration(restored_data, metadata):
     
     return validation_errors
 
-def inverse_transform_schedule(input_file, staff_names=None, start_date=None, output_file=None):
+def inverse_transform_schedule(*, input_file, staff_names=None, start_date=None, output_file=None):
     """
     逆変換: 簡略化されたCSVから元の日本語表形式に戻す（従来版）
     メタデータを使わずに推定で復元する簡易版
@@ -319,10 +319,10 @@ if __name__ == "__main__":
             metadata = json.load(f)
         
         # 改善された完全復元
-        restored_data = perfect_inverse_transform_improved(input_file, metadata_file)
+        restored_data = perfect_inverse_transform_improved(input_file=input_file, metadata_file=metadata_file)
         
         # バリデーション実行
-        validation_errors = validate_schedule_restoration(restored_data, metadata)
+        validation_errors = validate_schedule_restoration(restored_data=restored_data, metadata=metadata)
         if validation_errors:
             print("バリデーションエラー:")
             for error in validation_errors[:3]:  # 最初の3つだけ表示

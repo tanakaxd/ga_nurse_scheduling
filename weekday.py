@@ -10,11 +10,11 @@ class Weekday(Enum):
     SATURDAY = 6
 
     @staticmethod
-    def value_of_weekday_from_date(starting_weekday_of_month, date):
+    def value_of_weekday_from_date(*, starting_weekday_of_month, date):
         return (date % 7 + starting_weekday_of_month.value - 1) % 7
     
     @staticmethod
-    def weekday_from_date(starting_weekday_of_month, date):
+    def weekday_from_date(*, starting_weekday_of_month, date):
         value = (date % 7 + starting_weekday_of_month.value - 1) % 7
         return Weekday(value)
     

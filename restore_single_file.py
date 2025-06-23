@@ -8,7 +8,7 @@ import sys
 import json
 from inverse_transform_schedule import perfect_inverse_transform_improved, validate_schedule_restoration
 
-def restore_file(input_file, metadata_file=None):
+def restore_file(*, input_file, metadata_file=None):
     """
     指定されたファイルを逆変換する
     """
@@ -31,7 +31,7 @@ def restore_file(input_file, metadata_file=None):
         with open(metadata_file, 'r', encoding='utf-8') as f:
             metadata = json.load(f)
         
-        errors = validate_schedule_restoration(restored_data, metadata)
+        errors = validate_schedule_restoration(restored_data=restored_data, metadata=metadata)
         
         if errors:
             print("⚠️  バリデーションエラー:")
@@ -64,5 +64,5 @@ if __name__ == "__main__":
     input_file = sys.argv[1]
     metadata_file = sys.argv[2] if len(sys.argv) > 2 else None
     
-    success = restore_file(input_file, metadata_file)
+    success = restore_file(input_file=input_file, metadata_file=metadata_file)
     sys.exit(0 if success else 1)

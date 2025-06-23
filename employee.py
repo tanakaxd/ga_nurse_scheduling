@@ -3,7 +3,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 class Employee(object):
-    def __init__(self,name,able_to_cnt,on_duty_per_week,date_off_duty,plot_preference = {"A":3,"B":3,"C":3,"E":3,"NE":3}):
+    def __init__(self, *, name, able_to_cnt, on_duty_per_week, date_off_duty, plot_preference={"A":3,"B":3,"C":3,"E":3,"NE":3}):
         self.name = name
         # self.able_to = able_to
         self.able_to_cnt = able_to_cnt
@@ -26,5 +26,7 @@ class Employee(object):
 
         #休みに幸福度を設定する可能性。別の言い方をすれば、予定より多く勤務することをどの程度嫌うか
 
-    def wish(self,schedule,index):
+    def wish(self, *, schedule, index):
+        # Base implementation returns 0
+        # Subclasses can override this method to implement specific wishes
         return 0
