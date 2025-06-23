@@ -93,22 +93,36 @@ def perfect_inverse_transform_improved(input_file, metadata_file=None, output_fi
         
         # メガネコーナー割当の復元（働いているスタッフに1-5を割り当て）
         if working_staff:
-            # 元の割当番号を保持しているものを優先
-            used_numbers = set()
-            for staff in working_staff:
-                if staff['original_megane'].isdigit() and staff['original_megane'] not in used_numbers:
-                    megane_col_idx = staff['col_idx'] + 1
-                    if megane_col_idx < len(metadata['headers']):
-                        restored_row[megane_col_idx] = staff['original_megane']
-                        used_numbers.add(staff['original_megane'])
+            # 元の清掃割当と新しい清掃割当を比較
+            original_assignments = {}
+            new_assignments = {}
             
-            # 残りのスタッフに未使用の番号を割り当て
-            available_numbers = [str(i) for i in range(1, 6) if str(i) not in used_numbers]
             for staff in working_staff:
-                megane_col_idx = staff['col_idx'] + 1
-                if megane_col_idx < len(metadata['headers']) and restored_row[megane_col_idx] == '':
-                    if available_numbers:
-                        restored_row[megane_col_idx] = available_numbers.pop(0)
+                staff_name = staff['name']
+                # 元の清掃割当を取得
+                original_assignments[staff_name] = row_meta['staff_data'][staff_name].get('original_shift', '')
+                # 新しい清掃割当を取得
+                new_assignments[staff_name] = restored_row[staff['col_idx']]
+            
+            # 割当が変更されたかチェック
+            assignments_changed = original_assignments != new_assignments
+            
+            if not assignments_changed:
+                # 割当が変更されていない場合：元のメガネ番号を保持
+                for staff in working_staff:
+                    if staff['original_megane'].isdigit():
+                        megane_col_idx = staff['col_idx'] + 1
+                        if megane_col_idx < len(metadata['headers']):
+                            restored_row[megane_col_idx] = staff['original_megane']
+            else:
+                # 割当が変更された場合：ランダムに割り当て
+                available_numbers = list(range(1, 6))
+                random.shuffle(available_numbers)  # ランダムに並び替え
+                
+                for i, staff in enumerate(working_staff):
+                    megane_col_idx = staff['col_idx'] + 1
+                    if megane_col_idx < len(metadata['headers']) and i < len(available_numbers):
+                        restored_row[megane_col_idx] = str(available_numbers[i])
         
         # 休んでいるスタッフのメガネ割当は空にする
         for staff_name, staff_info in row_meta['staff_data'].items():
@@ -156,7 +170,7 @@ def validate_schedule_restoration(restored_data, metadata):
         working_staff = []
         megane_assignments = []
         
-        for staff_idx, staff_name in enumerate(metadata['staff_columns']):
+        for staff_name in metadata['staff_columns']:
             if staff_name in metadata['headers']:
                 staff_col_idx = metadata['headers'].index(staff_name)
                 if staff_col_idx < len(row):
@@ -296,7 +310,7 @@ if __name__ == "__main__":
     # 改善された完全復元テスト
     print("=== inverse_transform_schedule.py テスト ===")
     
-    input_file = "/home/ttnk0/projects/ga_nurse_scheduling/data/_schedule_July_OB_with_metadata.csv"
+    input_file = "/home/ttnk0/projects/ga_nurse_scheduling/data/output/schedule_2025July_3.csv"
     metadata_file = "/home/ttnk0/projects/ga_nurse_scheduling/data/_schedule_July_OB_metadata.json"
     
     try:

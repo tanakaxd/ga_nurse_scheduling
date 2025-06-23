@@ -1,7 +1,7 @@
 import csv
 import json
-from datetime import datetime, timedelta
-from inverse_transform_schedule import perfect_inverse_transform_improved, validate_schedule_restoration
+from datetime import datetime
+from inverse_transform_schedule import perfect_inverse_transform_improved, validate_schedule_restoration, inverse_transform_schedule
 
 def transform_schedule_with_metadata(input_file, save_metadata=True):
     """
@@ -19,8 +19,8 @@ def transform_schedule_with_metadata(input_file, save_metadata=True):
     
     # Read the CSV file
     with open(input_file, 'r', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        headers = reader.fieldnames
+        reader = csv.reader(file)
+        headers = next(reader)  # Read headers manually
         metadata['headers'] = list(headers)
         
         # Identify staff columns (excluding meta columns)
@@ -29,9 +29,17 @@ def transform_schedule_with_metadata(input_file, save_metadata=True):
         
         # Process each row
         row_index = 0
-        for row in reader:
-            if not row['曜日'].strip():  # Stop if no date
+        for raw_row in reader:
+            if len(raw_row) < 2 or not raw_row[1].strip():  # Stop if no weekday
                 break
+                
+            # Convert row to dictionary for easier access
+            row = {}
+            for i, header in enumerate(headers):
+                if i < len(raw_row):
+                    row[header] = raw_row[i]
+                else:
+                    row[header] = ''
                 
             # Save complete row metadata
             row_metadata = {
@@ -48,19 +56,17 @@ def transform_schedule_with_metadata(input_file, save_metadata=True):
             }
             
             day_schedule = []
+            
             for i, staff in enumerate(staff_cols):
                 # Get both shift value and priority (next column)
-                shift_value = row[staff].strip() if staff in row else ''
+                shift_value = row.get(staff, '').strip()
                 
                 # Get priority value from next column if it exists
-                priority_col_idx = list(headers).index(staff) + 1
+                staff_col_idx = headers.index(staff)
+                priority_col_idx = staff_col_idx + 1
                 priority_value = ''
-                if priority_col_idx < len(headers):
-                    priority_col = headers[priority_col_idx]
-                    # 空の列名の場合も値を取得
-                    priority_value = list(row.values())[priority_col_idx] if priority_col_idx < len(row.values()) else ''
-                    if isinstance(priority_value, str):
-                        priority_value = priority_value.strip()
+                if priority_col_idx < len(raw_row):
+                    priority_value = raw_row[priority_col_idx].strip()
                 
                 # Store original values
                 row_metadata['staff_data'][staff] = {
@@ -91,110 +97,7 @@ def transform_schedule_with_metadata(input_file, save_metadata=True):
     # Return the transformed data and metadata
     return output, metadata
 
-def inverse_transform_schedule(input_file, staff_names=None, start_date=None, output_file=None):
-    """
-    逆変換: 簡略化されたCSVから元の日本語表形式に戻す
-    
-    Args:
-        input_file: 変換済みCSVファイルのパス
-        staff_names: スタッフ名のリスト（Noneの場合はデフォルト名を使用）
-        start_date: 開始日（'YYYY-MM-DD'形式、Noneの場合は当月1日）
-        output_file: 出力ファイルパス（Noneの場合は元ファイル名_reversed.csvを使用）
-    
-    Returns:
-        逆変換されたデータのリスト
-    """
-    
-    # デフォルトのスタッフ名（constants.pyから取得したもの）
-    if staff_names is None:
-        staff_names = ['大場', '渡辺', '村岡', '志村', '田中', '松本', '久保', '渡辺（社', '山城', '真渕']
-    
-    # 開始日の設定
-    if start_date is None:
-        # 当月の1日を設定
-        today = datetime.now()
-        start_date = f"{today.year}-{today.month:02d}-01"
-    
-    # 曜日名の日本語表記
-    weekdays = ['月', '火', '水', '木', '金', '土', '日']
-    
-    # 出力ファイル名の設定
-    if output_file is None:
-        output_file = input_file.replace('.csv', '_reversed.csv')
-    
-    # 変換済みCSVファイルを読み込み
-    with open(input_file, 'r', encoding='utf-8') as file:
-        reader = csv.reader(file)
-        schedule_data = list(reader)
-    
-    # 出力データの準備
-    output_data = []
-    
-    # ヘッダー行の作成
-    header = ['日付', '曜日']
-    for staff in staff_names:
-        header.extend([staff, ''])  # スタッフ名の後に空列を追加
-    header.extend(['備考', 'cnt', 'vld', 'メガネ'])
-    output_data.append(header)
-    
-    # 各日のデータを処理
-    start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-    
-    for day_idx, day_schedule in enumerate(schedule_data):
-        current_date = start_dt + timedelta(days=day_idx)
-        
-        # 日付と曜日
-        date_str = str(current_date.day)
-        weekday_str = weekdays[current_date.weekday()]
-        
-        row = [date_str, weekday_str]
-        
-        # 各スタッフのシフトを変換
-        shift_count = 0
-        for staff_idx, shift in enumerate(day_schedule):
-            if staff_idx < len(staff_names):
-                # 逆変換ルール
-                if shift == 'R':
-                    display_shift = '休'
-                    priority = ''
-                elif shift == 'C':
-                    display_shift = 'C/D'
-                    priority = '4'  # デフォルト優先度
-                    shift_count += 1
-                elif shift in ['A', 'B', 'E', 'NE']:
-                    display_shift = shift
-                    # 優先度をシフトタイプに基づいて設定
-                    priority_map = {'A': '1', 'B': '3', 'E': '5', 'NE': '2'}
-                    priority = priority_map.get(shift, '1')
-                    shift_count += 1
-                else:
-                    display_shift = shift
-                    priority = '1'
-                    shift_count += 1
-                
-                row.extend([display_shift, priority])
-        
-        # 不足分を空で埋める
-        while len(row) < 2 + len(staff_names) * 2:
-            row.extend(['', ''])
-        
-        # 備考、cnt、vld、メガネの列
-        is_valid = shift_count == 5  # 5人勤務の場合有効
-        cnt_value = shift_count if shift_count > 0 else 0
-        vld_value = 5 if is_valid else -1
-        megane_value = 'TRUE' if is_valid else 'FALSE'
-        
-        row.extend(['', str(cnt_value), str(vld_value), megane_value])
-        
-        output_data.append(row)
-    
-    # CSVファイルに書き込み
-    with open(output_file, 'w', encoding='utf-8', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerows(output_data)
-    
-    print(f"逆変換完了: {output_file}")
-    return output_data
+# 逆変換機能はinverse_transform_schedule.pyからインポート
 
 def transform_schedule(input_file):
     """
@@ -228,48 +131,48 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"正変換エラー: {e}")
     
-    # 改善された完全復元テスト
-    print("\n=== 改善された完全復元テスト ===")
-    try:
-        # メタデータの読み込み
-        with open("/home/ttnk0/projects/ga_nurse_scheduling/data/_schedule_July_OB_metadata.json", 'r', encoding='utf-8') as f:
-            metadata = json.load(f)
+    # # 改善された完全復元テスト
+    # print("\n=== 改善された完全復元テスト ===")
+    # try:
+    #     # メタデータの読み込み
+    #     with open("/home/ttnk0/projects/ga_nurse_scheduling/data/_schedule_July_OB_metadata.json", 'r', encoding='utf-8') as f:
+    #         metadata = json.load(f)
         
-        restored_data = perfect_inverse_transform_improved(
-            output_file,
-            metadata_file="/home/ttnk0/projects/ga_nurse_scheduling/data/_schedule_July_OB_metadata.json"
-        )
-        print("改善された完全復元テスト完了")
+    #     restored_data = perfect_inverse_transform_improved(
+    #         output_file,
+    #         metadata_file="/home/ttnk0/projects/ga_nurse_scheduling/data/_schedule_July_OB_metadata.json"
+    #     )
+    #     print("改善された完全復元テスト完了")
         
-        # バリデーション実行
-        validation_errors = validate_schedule_restoration(restored_data, metadata)
-        if validation_errors:
-            print("バリデーションエラー:")
-            for error in validation_errors[:5]:  # 最初の5つのエラーだけ表示
-                print(f"  - {error}")
-            if len(validation_errors) > 5:
-                print(f"  ... 他{len(validation_errors)-5}件のエラー")
-        else:
-            print("バリデーション: 全てのチェックをパス")
+    #     # バリデーション実行
+    #     validation_errors = validate_schedule_restoration(restored_data, metadata)
+    #     if validation_errors:
+    #         print("バリデーションエラー:")
+    #         for error in validation_errors[:5]:  # 最初の5つのエラーだけ表示
+    #             print(f"  - {error}")
+    #         if len(validation_errors) > 5:
+    #             print(f"  ... 他{len(validation_errors)-5}件のエラー")
+    #     else:
+    #         print("バリデーション: 全てのチェックをパス")
         
-        # 復元データの検証
-        print("復元データの最初の行（ヘッダー）:")
-        print(restored_data[0][:10])  # 最初の10列だけ表示
-        print("復元データの2行目:")
-        print(restored_data[1][:10])  # 最初の10列だけ表示
+    #     # 復元データの検証
+    #     print("復元データの最初の行（ヘッダー）:")
+    #     print(restored_data[0][:10])  # 最初の10列だけ表示
+    #     print("復元データの2行目:")
+    #     print(restored_data[1][:10])  # 最初の10列だけ表示
         
-    except Exception as e:
-        print(f"改善された完全復元エラー: {e}")
+    # except Exception as e:
+    #     print(f"改善された完全復元エラー: {e}")
     
-    # 従来の逆変換との比較
-    print("\n=== 従来の逆変換との比較 ===")
-    try:
-        staff_names = ['大場', '渡辺', '村岡', '志村', '田中', '松本', '久保', '渡辺（社', '山城', '真渕']
-        old_result = inverse_transform_schedule(
-            output_file, 
-            staff_names=staff_names, 
-            start_date="2024-07-01"
-        )
-        print("従来の逆変換も正常動作")
-    except Exception as e:
-        print(f"従来の逆変換エラー: {e}")
+    # # 従来の逆変換との比較
+    # print("\n=== 従来の逆変換との比較 ===")
+    # try:
+    #     staff_names = ['大場', '渡辺', '村岡', '志村', '田中', '松本', '久保', '渡辺（社', '山城', '真渕']
+    #     old_result = inverse_transform_schedule(
+    #         output_file, 
+    #         staff_names=staff_names, 
+    #         start_date="2024-07-01"
+    #     )
+    #     print("従来の逆変換も正常動作")
+    # except Exception as e:
+    #     print(f"従来の逆変換エラー: {e}")
