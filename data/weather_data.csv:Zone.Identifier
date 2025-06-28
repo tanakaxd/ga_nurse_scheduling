@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://www.data.jma.go.jp/risk/obsdl/index.php
+HostUrl=https://www.data.jma.go.jp/risk/obsdl/show/table
